@@ -1,0 +1,65 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h4 class="fw-bold text-dark mb-1 text-uppercase">Quản lý mã Mua 1 tặng 1</h4>
+            <p class="text-muted small mb-0">Mã sale + freeship 1tr - Đếm từ đơn đã đặt</p>
+        </div>
+        <a href="{{ url_for('admin_add_voucher') }}" class="btn btn-dark btn-sm fw-bold px-3 shadow-sm" style="border-radius: 8px;">+ Tạo mã mới</a>
+    </div>
+
+    <div class="card border-0 shadow-sm bg-white p-0" style="border-radius: 14px; overflow: hidden;">
+        <div class="table-responsive">
+            <table class="table table-admin table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Mã</th>
+                        <th>Giảm</th>
+                        <th>Đơn tối thiểu</th>
+                        <th class="text-center">Còn lại</th>
+                        <th class="text-center">Đã dùng (số đơn)</th>
+                        <th>Hạn</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in vouchers %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-primary">{{ v.code }}{% if v.is_freeship %}<br><span class="badge bg-success rounded-pill" style="font-size:0.65rem;">Freeship</span>{% endif %}</td>
+                        <td class="fw-bold text-danger">{% if v.discount_type == 'PERCENT' %}{{ v.discount_amount }}%{% if v.max_discount and v.max_discount|float > 0 %} <small class="text-muted">(tối đa {{ '{:,.0f}'.format(v.max_discount) }}đ)</small>{% endif %}{% else %}{{ '{:,.0f}'.format(v.discount_amount) }} đ{% endif %}</td>
+                        <td class="text-muted">{{ '{:,.0f}'.format(v.min_order_amount) }} đ</td>
+                        <td class="text-center fw-bold">{{ v.usage_limit }}</td>
+                        <td class="text-center"><span class="badge bg-info-subtle text-info border rounded-pill">{{ v.used_count }}</span></td>
+                        <td class="text-muted small">{{ v.expires_at }}</td>
+                        <td class="text-center">
+                            {% if v.state == 'active' %}
+                                <span class="badge bg-success-subtle text-success border border-success rounded-pill px-3 py-1">Đang dùng được</span>
+                            {% elif v.state == 'out' %}
+                                <span class="badge bg-secondary-subtle text-secondary border rounded-pill px-3 py-1">Hết lượt</span>
+                            {% else %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger rounded-pill px-3 py-1">Hết hạn</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center pe-4">
+                            <a href="{{ url_for('admin_edit_voucher', voucher_id=v.id) }}" class="btn btn-outline-primary btn-sm px-3 rounded-pill fw-bold" style="font-size: 0.75rem;">Sửa</a>
+                            <form action="{{ url_for('admin_delete_voucher', voucher_id=v.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Xóa/khóa mã {{ v.code }}? Mã đã có đơn dùng sẽ chuyển thành KHÓA thay vì xóa.');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-bold" style="font-size: 0.75rem;">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">Chưa có mã nào. Bấm “Tạo mã mới”.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="p-3 border-top bg-light text-muted small">
+            Tổng cộng có <b>{{ vouchers|length }}</b> mã. Mã đã có đơn dùng sẽ bị khóa sửa mã/loại/mức giảm và xóa chuyển thành khóa.
+        </div>
+    </div>
+</div>
+{% endblock %}

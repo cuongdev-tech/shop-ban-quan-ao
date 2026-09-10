@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hóa đơn #ORD-{{ order.id }} - FashionShop</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #222; background: #f4f6f8; margin: 0; padding: 24px; }
+  .bill { max-width: 560px; margin: auto; background: #fff; border-radius: 12px; padding: 28px 30px; box-shadow: 0 2px 12px rgba(0,0,0,.08); border-top: 6px solid #111; }
+  .shop h2 { background: #111; -webkit-background-clip: initial; background-clip: initial; color: #111; }
+  .shop { text-align: center; border-bottom: 2px dashed #ddd; padding-bottom: 14px; margin-bottom: 14px; }
+  .shop h2 { margin: 0 0 4px; }
+  .shop p { margin: 2px 0; font-size: 12px; color: #666; }
+  .title { text-align: center; margin: 12px 0; }
+  .title h3 { margin: 0; }
+  .row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; }
+  .row span:first-child { color: #666; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+  th, td { border-bottom: 1px solid #eee; padding: 8px 4px; text-align: left; }
+  th { color: #666; font-size: 11px; text-transform: uppercase; }
+  td.num, th.num { text-align: right; }
+  .total { display: flex; justify-content: space-between; font-size: 16px; font-weight: bold; margin-top: 12px; }
+  .total .amount { color: #d63384; }
+  .thanks { text-align: center; font-size: 12px; color: #666; margin-top: 14px; border-top: 2px dashed #ddd; padding-top: 12px; }
+  .actions { text-align: center; margin-bottom: 16px; display: flex; gap: 8px; justify-content: center; }
+  .btn { display: inline-block; padding: 10px 22px; border-radius: 999px; text-decoration: none; font-weight: bold; font-size: 14px; border: none; cursor: pointer; }
+  .btn-print { background: linear-gradient(135deg, #e1436b, #b92c52); color: #fff; }
+  .btn-back { background: #e9ecef; color: #333; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .bill { box-shadow: none; border-radius: 0; max-width: 100%; }
+    .actions { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="actions">
+  <button class="btn btn-print" onclick="window.print()">🖨️ In hóa đơn</button>
+  <a class="btn btn-back" href="javascript:history.back()">Quay lại</a>
+</div>
+<div class="bill">
+  <div class="shop">
+    <h2>FashionShop</h2>
+    <p>02 Chơn Tâm 9, Liên Chiểu, Đà Nẵng — 1900 8888</p>
+    <p>support@fashionshop.vn</p>
+  </div>
+  <div class="title">
+    <h3>HÓA ĐƠN BÁN HÀNG #ORD-{{ order.id }}</h3>
+    <p style="font-size:12px;color:#666;">Ngày: {{ order.created_at }} (in lại: {{ today }}) — Trạng thái: {{ order.status }}</p>
+  </div>
+  <div class="row"><span>Khách hàng:</span><strong>{{ order.fullname }}</strong></div>
+  <div class="row"><span>SĐT:</span><span>{{ order.phone }}</span></div>
+  <div class="row"><span>Địa chỉ:</span><span>{{ order.address }}</span></div>
+  <div class="row"><span>Thanh toán:</span><span>{{ order.payment_method }}</span></div>
+  {% if seller %}
+  <div class="row"><span>NV lập đơn:</span><span>{{ seller.name }} ({{ seller.role }})</span></div>
+  {% endif %}
+  {% if order.voucher_code %}
+  <div class="row"><span>Voucher:</span><span>{{ order.voucher_code }}</span></div>
+  {% endif %}
+  <table>
+    <thead>
+      <tr><th>Sản phẩm</th><th class="num">SL</th><th class="num">Đơn giá</th><th class="num">Thành tiền</th></tr>
+    </thead>
+    <tbody>
+      {% for it in items %}
+      <tr>
+        <td>{{ it.name }}{% if it.is_gift %} <b style="color:#c23358;">(quà/combo 0đ)</b>{% endif %}{% if it.variant_size %}<br><small style="color:#666;">Size {{ it.variant_size }}/{{ it.variant_color }}</small>{% else %}<br><small style="color:#999;">bản thường</small>{% endif %}</td>
+        <td class="num">x{{ it.quantity }}</td>
+        <td class="num">{{ '{:,.0f}'.format(it.unit_price) }}</td>
+        <td class="num">{{ '{:,.0f}'.format(it.unit_price * it.quantity) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" style="text-align:center;color:#999;">Không có chi tiết món.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="row" style="margin-top:10px;"><span>Tạm tính:</span><span>{{ '{:,.0f}'.format(subtotal) }} đ</span></div>
+  {% if order.discount_amount and order.discount_amount|float > 0 %}
+  <div class="row"><span>Giảm giá{% if order.voucher_code %} ({{ order.voucher_code }}){% endif %}:</span><span>-{{ '{:,.0f}'.format(order.discount_amount) }} đ</span></div>
+  {% endif %}
+  {% if order.points_discount and order.points_discount|float > 0 %}
+  <div class="row"><span>Trừ điểm ({{ order.points_used }} điểm):</span><span>-{{ '{:,.0f}'.format(order.points_discount) }} đ</span></div>
+  {% endif %}
+  <div class="row"><span>Phí ship{% if order.ship_carrier %} ({{ order.ship_carrier }}){% endif %}{% if order.ship_zone == 'ngoai_thanh' %} - ngoại thành{% elif order.ship_zone %} - nội thành{% endif %}{% if order.status == 'Đã hủy' %} (đơn hoàn){% endif %}:</span><span>{% if order.shipping_fee and order.shipping_fee|float > 0 %}{{ '{:,.0f}'.format(order.shipping_fee) }} đ{% else %}Miễn phí{% endif %}</span></div>
+  {% if order.channel %}<div class="row"><span>Kênh:</span><span>{{ 'Tại quầy' if order.channel == 'tai_quay' else 'Online' }}{% if store %} - {{ store.branch_name }}{% endif %}</span></div>{% endif %}
+  {% if order.dong_kiem %}<div class="row"><span>Đồng kiểm:</span><span>Cho xem hàng trước khi nhận</span></div>{% endif %}
+  {% if order.note %}<div class="row"><span>Ghi chú:</span><span>{{ order.note }}</span></div>{% endif %}
+  {% if combos %}{% for cb in combos %}<div class="row"><span>Combo {{ cb.name }} x{{ cb.qty }}:</span><span>-{{ '{:,.0f}'.format(cb.discount) }} đ</span></div>{% endfor %}{% endif %}
+  {% if gift %}<div class="row"><span>Quà kèm:</span><span>{{ gift }} x1</span></div>{% endif %}
+  <div class="total"><span>TỔNG THANH TOÁN</span><span class="amount">{{ '{:,.0f}'.format(order.total_amount) }} đ</span></div>
+  {% if exchanges %}
+  <div class="thanks" style="text-align:left;">
+    <b>Lịch sử đổi size:</b>
+    {% for ex in exchanges %}
+    <div style="font-size:12px;">• {{ ex.osize }}/{{ ex.ocolor }} → {{ ex.nsize }}/{{ ex.ncolor }} ({{ ex.created_at }})</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <div class="thanks">Cảm ơn quý khách đã mua sắm tại FashionShop!<br>Kiểm hàng trước khi nhận - Đổi 14 ngày còn tem + hóa đơn - GHN 24h/3-4 ngày.</div>
+</div>
+</body>
+</html>

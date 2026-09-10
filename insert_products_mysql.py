@@ -27,11 +27,12 @@ products = [
     ('Quần short đũi nam dây rút lưng thun', 160000, 140, 'Quần', 'Vải đũi xước tự nhiên siêu nhẹ và mát, thích hợp mặc ở nhà, đi biển hoặc dạo phố ngày hè.', 'https://example.com/quan-doi-nam.jpg', 0),
 ]
 
-query = 'INSERT INTO products (name, price, stock, category, description, image, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?)'
+query = 'INSERT INTO products (name, price, stock, category, description, image, is_featured, is_active) VALUES (%s, %s, %s, %s, %s, %s, %s, 1)'
 
 try:
     with app.app_context():
-        execute_db(query, products, commit=True, many=True)
+        for p in products:
+            execute_db(query, p)
     print(f'Đã chèn {len(products)} sản phẩm vào MySQL ({os.environ.get("MYSQL_DB")} ).')
 except Exception as e:
     print('Lỗi khi chèn vào MySQL:', e)

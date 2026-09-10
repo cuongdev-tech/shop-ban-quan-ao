@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="row justify-content-center mt-4 mb-5">
+  <div class="col-md-5">
+    <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+      <div class="text-center mb-4">
+        <h3 class="fw-bold text-dark text-uppercase">Quên mật khẩu</h3>
+        <p class="text-muted small">Nhập email đã đăng ký để tạo link đặt lại (hiệu lực 1 giờ)</p>
+      </div>
+      <form method="POST">
+        <div class="mb-3">
+          <label class="form-label fw-semibold text-secondary small">Email đăng nhập</label>
+          <input type="email" name="email" class="form-control bg-light border-0 py-2" required placeholder="name@example.com">
+        </div>
+        <button type="submit" class="btn btn-dark w-100 rounded-pill fw-bold shadow-sm">Tạo link đặt lại</button>
+      </form>
+      {% if reset_link %}
+      <div class="alert alert-info mt-4 small">
+        <b>Link đặt lại (demo, do shop chưa gửi email tự động):</b><br>
+        <a href="{{ reset_link }}">{{ reset_link }}</a>
+      </div>
+      {% endif %}
+      <div class="text-center mt-3">
+        <p class="small text-muted">Nhớ rồi? <a href="{{ url_for('login') }}" class="text-decoration-none fw-bold">Đăng nhập</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

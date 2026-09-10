@@ -1,19 +1,20 @@
 {% extends 'layout.html' %}
 {% block content %}
 <div class="container mt-4 mb-5">
-    <h3 class="fw-bold mb-4"> Danh sách yêu thích của bạn</h3>
+    <h3 class="fw-bold mb-1 text-uppercase">Danh sách yêu thích</h3>
+    <p class="text-muted small mb-4">Đã thích - Thêm vào giỏ khi vừa size M-5XL - Kiểm hàng trước khi nhận</p>
     
     {% if not products %}
     <div class="alert alert-light text-center py-5 shadow-sm rounded">
         <h5 class="text-muted mb-3">Bạn chưa có sản phẩm yêu thích nào.</h5>
-        <a href="{{ url_for('index') }}" class="btn btn-primary rounded-pill px-4">Tiếp tục mua sắm</a>
+        <a href="{{ url_for('index') }}" class="btn btn-dark rounded-pill px-4">Tiếp tục mua sắm</a>
     </div>
     {% else %}
     <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
         {% for product in products %}
         <div class="col">
-            <div class="card h-100 border-0 shadow-sm position-relative">
-                
+            <div class="card h-100 shadow-sm rounded-4 product-card position-relative">
+
                 <!-- Nút bỏ thích -->
                 <form action="{{ url_for('toggle_wishlist', product_id=product.id) }}" method="POST" class="position-absolute top-0 end-0 p-2" style="z-index: 10;">
                     <button type="submit" class="btn btn-sm btn-danger rounded-circle shadow" style="width: 32px; height: 32px; padding: 0;" title="Bỏ thích">
@@ -22,17 +23,19 @@
                 </form>
 
                 <a href="{{ url_for('product_detail', product_id=product.id) }}" class="text-decoration-none text-dark">
-                    <img src="{{ product.image }}" class="card-img-top p-2" alt="{{ product.name }}" style="height: 200px; object-fit: contain;">
+                    <img src="{{ product.image }}" class="card-img-top product-img p-2" alt="{{ product.name }}" style="height: 200px;" loading="lazy">
                     <div class="card-body">
                         <h6 class="card-title text-truncate" title="{{ product.name }}">{{ product.name }}</h6>
-                        <p class="card-text text-danger fw-bold mb-0">{{ '{:,.0f}'.format(product.price) }} đ</p>
+                        <p class="card-text mb-0"><span class="price-tag">{% if product.on_sale %}<small class="text-muted text-decoration-line-through fw-normal">{{ '{:,.0f}'.format(product.price) }}</small> {% endif %}{{ '{:,.0f}'.format(product.eff_price) }} đ</span>{% if product.on_sale %} <span class="badge badge-sale rounded-pill">-{{ product.discount_pct }}%</span>{% endif %}</p>
                     </div>
                 </a>
                 
                 <div class="card-footer bg-white border-0 pt-0 pb-3">
-                    <a href="{{ url_for('add_to_cart', product_id=product.id) }}" class="btn btn-outline-primary btn-sm w-100 rounded-pill fw-bold">
-                        🛒 Thêm vào giỏ
-                    </a>
+                    <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST" class="m-0">
+                        <button type="submit" class="btn btn-dark btn-sm w-100 rounded-pill fw-bold text-uppercase">
+                            Thêm vào giỏ
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

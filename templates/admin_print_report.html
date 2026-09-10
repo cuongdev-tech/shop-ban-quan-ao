@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Báo cáo doanh thu - FashionShop</title>
+<style>
+  body { font-family: Arial, sans-serif; color: #222; border-top: 6px solid #e1436b; margin: 0; padding: 16px; }
+  h2 { text-align: center; color: #b92c52; }
+  h2 { text-align: center; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #999; padding: 8px; font-size: 13px; }
+  th { background: #fdeef3; color: #9a2c4e; }
+  .meta { text-align: center; color: #555; font-size: 13px; }
+  @media print { .no-print { display: none; } }
+</style>
+</head>
+<body>
+<div class="no-print" style="text-align:center;margin-bottom:12px;">
+  <button onclick="window.print()">In / Lưu PDF</button>
+  <a href="{{ url_for('admin_dashboard') }}">Quay lại</a>
+</div>
+<h2>BÁO CÁO DOANH THU - FASHIONSHOP</h2>
+<p class="meta">Ngày xuất: {{ namespace_today if namespace_today is defined else '' }}</p>
+<table>
+  <thead>
+    <tr>
+      <th>Mã đơn</th><th>Khách hàng</th><th>SĐT</th><th>Tổng tiền</th><th>Trạng thái</th><th>Ngày đặt</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for o in orders %}
+    <tr>
+      <td>#ORD-{{ o.id }}</td>
+      <td>{{ o.fullname or ('User #' ~ o.user_id if o.user_id else '') }}</td>
+      <td>{{ o.phone }}</td>
+      <td>{{ '{:,.0f}'.format(o.total_amount) }} đ</td>
+      <td>{{ o.status }}</td>
+      <td>{{ o.created_at }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" style="text-align:center;">Chưa có đơn hàng.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+<script>window.onload = function(){ /* auto print khi mở từ nút In/PDF */ };</script>
+</body>
+</html>

@@ -5,16 +5,16 @@
     <!-- Tiêu đề và Thanh lọc theo ngày -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h3 class="fw-bold text-dark">Quản lý Đơn hàng</h3>
-            <p class="text-muted small mb-0">Theo dõi và xử lý danh sách đơn đặt hàng của khách</p>
+            <h3 class="fw-bold text-dark text-uppercase">Quản lý đơn hàng</h3>
+            <p class="text-muted small mb-0">COD/CK-QR - GHN 24h nội thành - Đổi 14 ngày còn tem</p>
         </div>
         
         <form method="GET" action="{{ url_for('admin_orders') }}" class="d-flex gap-2 align-items-center bg-white p-2 rounded shadow-sm">
             <label class="fw-bold small text-secondary mb-0">Chọn ngày:</label>
             <input type="date" name="date" class="form-control form-control-sm border-secondary" value="{{ selected_date }}">
-            <button type="submit" class="btn btn-primary btn-sm px-3 fw-bold">Lọc</button>
+            <button type="submit" class="btn btn-dark btn-sm px-3 fw-bold text-uppercase">Lọc</button>
             {% if selected_date %}
-            <a href="{{ url_for('admin_orders') }}" class="btn btn-outline-danger btn-sm">✖</a>
+            <a href="{{ url_for('admin_orders') }}" class="btn btn-outline-danger btn-sm">Bỏ lọc</a>
             {% endif %}
         </form>
     </div>
@@ -22,7 +22,7 @@
     <!-- Bảng danh sách đơn hàng -->
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
         <div class="table-responsive">
-            <table class="table align-middle mb-0">
+            <table class="table table-admin align-middle mb-0">
                 <thead class="table-light text-uppercase fs-7 text-secondary">
                     <tr>
                         <th class="py-3 ps-4">Mã đơn</th>
@@ -38,11 +38,11 @@
                         {% for item in orders_data %}
                         {% set order = item.order %}
                         <tr>
-                            <td class="ps-4 fw-bold text-primary">#ORD-{{ order.id }}</td>
+                            <td class="ps-4 fw-bold text-primary"><a href="{{ url_for('admin_order_detail', order_id=order.id) }}" class="text-decoration-none">#ORD-{{ order.id }}</a><br><a href="{{ url_for('order_bill', order_id=order.id) }}" target="_blank" class="small text-decoration-none">In HĐ</a></td>
                             <td>
                                 <div class="fw-bold text-dark">{{ order.fullname }}</div>
-                                <div class="text-muted small">📞 {{ order.phone }} | ✉️ {{ order.email }}</div>
-                                <div class="text-secondary small fst-italic">📍 {{ order.address }}</div>
+                                <div class="text-muted small">{{ order.phone }} | {{ order.email }}</div>
+                                <div class="text-secondary small fst-italic">{{ order.address }}</div>
                             </td>
                             <td class="text-center">
                                 <span class="badge bg-secondary rounded-pill">{{ item.item_count }}</span>

@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <nav class="small mb-2"><a href="{{ url_for('post_list') }}" class="text-decoration-none">Bài phối đồ</a> / {{ p.title }}</nav>
+  <h3 class="fw-bold mb-1">{{ p.title }}</h3>
+  <div class="small text-muted mb-3">{{ p.ctitle or '' }} • {{ p.created_at }}</div>
+  {% if p.image %}<img src="{{ p.image }}" class="w-100 rounded-4 shadow-sm mb-4" style="max-height:360px;object-fit:cover;">{% endif %}
+  <div class="bg-white rounded-4 shadow-sm p-4 mb-4" style="white-space:pre-line;line-height:1.7;">{{ p.content }}</div>
+  {% if prods %}
+  <h5 class="fw-bold mb-3">Sản phẩm trong bài ({{ prods|length }})</h5>
+  <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3 mb-4">
+    {% for pr in prods %}
+    <div class="col">
+      <div class="card h-100 shadow-sm rounded-4 product-card">
+        <a href="{{ url_for('product_detail', product_id=pr.id) }}"><img src="{{ pr.image }}" class="card-img-top product-img" loading="lazy"></a>
+        <div class="card-body p-3 d-flex flex-column">
+          <div class="fw-semibold text-truncate small">{{ pr.name }}</div>
+          <div class="mt-auto fw-bold text-danger">{{ '{:,.0f}'.format(pr.eff_price) }} đ</div>
+          <form action="{{ url_for('add_to_cart', product_id=pr.id) }}" method="POST" class="mt-2"><button class="btn btn-dark btn-sm w-100" type="submit">Thêm vào giỏ</button></form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if others %}
+  <h6 class="fw-bold mb-2">Bài khác</h6>
+  <div class="d-flex gap-2 flex-wrap">
+    {% for o in others %}<a href="{{ url_for('post_detail', slug=o.slug) }}" class="badge bg-light text-dark border text-decoration-none p-2">{{ o.title }}</a>{% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

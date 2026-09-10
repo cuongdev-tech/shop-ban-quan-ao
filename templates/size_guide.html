@@ -1,0 +1,51 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <h3 class="fw-bold text-dark mb-1 text-uppercase">Bảng size chuẩn M-5XL</h3>
+      <p class="text-muted small mb-4">Bigsize tới 140kg. Giữa 2 size? Ưu tiên size lớn nếu thích mặc rộng. Đổi 14 ngày nếu không vừa.</p>
+
+      <div class="card border-0 shadow-sm bg-white p-0 mb-4" style="border-radius: 16px; overflow: hidden;">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 align-middle text-center">
+            <thead class="table-light"><tr><th>Size</th><th>Vòng ngực</th><th>Vòng eo</th><th>Cân nặng</th><th>Chiều cao</th></tr></thead>
+            <tbody>
+              {% for g in guide %}
+              <tr {% if suggested == g.size %}class="table-warning fw-bold"{% endif %}>
+                <td class="fw-bold">{{ g.size }}{% if suggested == g.size %} ⭐{% endif %}</td>
+                <td>{{ g.chest }}cm</td><td>{{ g.waist }}cm</td><td>{{ g.weight }}</td><td>{{ g.height }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm p-4 bg-white" style="border-radius: 16px;">
+        <h5 class="fw-bold mb-3">Gợi ý size theo chiều cao + cân nặng</h5>
+        <form method="GET" action="{{ url_for('size_guide') }}" class="row g-2 align-items-end">
+          <div class="col-6">
+            <label class="form-label small fw-bold">Chiều cao (cm)</label>
+            <input type="number" name="height" class="form-control" min="100" max="250" step="1" value="{{ height }}" required placeholder="VD: 165">
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-bold">Cân nặng (kg)</label>
+            <input type="number" name="weight" class="form-control" min="20" max="300" step="1" value="{{ weight }}" required placeholder="VD: 55">
+          </div>
+          <div class="col-12 mt-3">
+            <button type="submit" class="btn btn-dark rounded-pill fw-bold px-4 text-uppercase">Xem size gợi ý</button>
+          </div>
+        </form>
+        {% if tried %}
+          {% if suggested %}
+          <div class="alert alert-success mt-3 mb-0">Với {{ height }}cm / {{ weight }}kg, bạn hợp <b>size {{ suggested }}</b> nhất. (Chỉ tham khảo — form mỗi hãng có thể lệch 1 size.)</div>
+          {% else %}
+          <div class="alert alert-danger mt-3 mb-0">Số đo không hợp lệ, vui lòng nhập lại!</div>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -5,15 +5,15 @@
     .sub-banner { height: 132px; object-fit: cover; border-radius: 12px; }
     
     .cat-card {
-        background: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px;
-        padding: 10px 24px; color: #555; text-decoration: none; font-weight: 600;
-        font-size: 0.95rem; transition: all 0.2s ease; white-space: nowrap; display: inline-block;
+        background: #ffffff; border: 1px solid #e0e0e0; border-radius: 999px;
+        padding: 6px 14px; color: #555; text-decoration: none; font-weight: 700;
+        font-size: 0.8rem; transition: all 0.2s ease; white-space: nowrap; display: inline-block;
     }
-    .cat-card:hover { border-color: #0d6efd; color: #0d6efd; background-color: #f8fbff; transform: translateY(-2px); }
-    .cat-card.active { background: #0d6efd; color: white; border-color: #0d6efd; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2); }
+    .cat-card:hover { border-color: var(--brand); color: var(--brand-dark); background-color: #fdf2f5; transform: translateY(-2px); }
+    .cat-card.active { background: linear-gradient(135deg, var(--brand), var(--brand-dark)); color: white; border-color: transparent; box-shadow: 0 4px 12px rgba(225, 67, 107, 0.35); }
 
     .product-card { border: 1px solid transparent; transition: all 0.3s ease; background: white; }
-    .product-card:hover { border-color: #0d6efd; box-shadow: 0 10px 20px rgba(0,0,0,0.08); transform: translateY(-5px); z-index: 2; }
+    .product-card:hover { border-color: var(--brand); box-shadow: 0 10px 20px rgba(0,0,0,0.08); transform: translateY(-5px); z-index: 2; }
     .product-img { height: 220px; object-fit: cover; border-top-left-radius: 12px; border-top-right-radius: 12px; }
     .price-tag { color: #ee4d2d; font-weight: bold; font-size: 1.1rem; }
     
@@ -25,14 +25,29 @@
     <!-- KHU VỰC BANNER -->
     <div class="row g-3 mb-4">
         <div class="col-md-8">
-            <div id="mainBanner" class="carousel slide carousel-fade shadow-sm h-100 rounded-4 overflow-hidden" data-bs-ride="carousel">
+            <div id="mainBanner" class="carousel slide carousel-fade shadow-sm h-100 rounded-4 overflow-hidden position-relative" data-bs-ride="carousel">
                 <div class="carousel-inner h-100">
+                    {% if banners %}
+                    {% for b in banners %}
+                    <div class="carousel-item {% if loop.first %}active{% endif %} h-100">
+                        {% if b.link %}<a href="{{ b.link }}">{% endif %}<img src="{{ b.image }}" class="d-block w-100 hero-banner" alt="{{ b.title or 'Banner' }}">{% if b.link %}</a>{% endif %}
+                    </div>
+                    {% endfor %}
+                    {% else %}
                     <div class="carousel-item active h-100">
-                        <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80" class="d-block w-100 hero-banner">
+                        <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80" class="d-block w-100 hero-banner" alt="Bộ sưu tập mới">
                     </div>
                     <div class="carousel-item h-100">
-                        <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&q=80" class="d-block w-100 hero-banner">
+                        <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&q=80" class="d-block w-100 hero-banner" alt="Sale thời trang">
                     </div>
+                    {% endif %}
+                </div>
+                <div class="position-absolute top-0 start-0 w-100 h-100" style="z-index: 2; background: linear-gradient(100deg, rgba(20,8,15,.72) 0%, rgba(20,8,15,.35) 45%, rgba(20,8,15,0) 70%); border-radius: 12px;"></div>
+                <div class="position-absolute top-50 start-0 translate-middle-y p-4 text-white" style="z-index: 3; text-shadow: 0 2px 8px rgba(0,0,0,.6);">
+                    <span class="badge bg-light text-dark mb-2">Mua 2 tặng 1 - Deal trải nghiệm</span>
+                    <h2 class="fw-bold mb-1">Mặc Đẹp Mỗi Ngày - Bigsize M-5XL</h2>
+                    <p class="mb-3 small">Kiểm hàng trước khi nhận - Đổi 14 ngày - Giao 24h nội thành</p>
+                    <a href="#goi-y" class="btn btn-fs-dark btn-sm px-4">Mua ngay</a>
                 </div>
                 <button class="carousel-control-prev" type="button" data-bs-target="#mainBanner" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
                 <button class="carousel-control-next" type="button" data-bs-target="#mainBanner" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
@@ -44,25 +59,98 @@
         </div>
     </div>
 
-    <!-- DANH MỤC SẢN PHẨM -->
-    <div class="bg-white p-4 rounded-4 shadow-sm mb-4">
-        <h5 class="fw-bold mb-3 text-dark text-uppercase border-start border-4 border-primary ps-3">Danh Mục Sản Phẩm</h5>
-        <div class="d-flex gap-3 scroll-container pb-2 pt-1">
-            <a href="{{ url_for('index') }}" class="cat-card {% if not category %}active{% endif %}">Tất cả</a>
+    <!-- DANH MUC SHOP -->
+    <div class="bg-white p-3 rounded-4 shadow-sm mb-4">
+        <h5 class="fw-bold mb-2 text-dark text-uppercase section-title">Danh mục sản phẩm</h5>
+        <div class="d-flex align-items-center gap-2">
+            <span class="fs-cat-label">Danh mục shop:</span>
+            <div class="d-flex gap-2 scroll-container pb-1 flex-fill">
+            <a href="{{ url_for('index', size=fsize, color=fcolor, min_price=fmin, max_price=fmax, sort=sort, sale='1' if sale else '') }}" class="cat-card {% if not category %}active{% endif %}">Tất cả</a>
             {% for cat in categories %}
-            <a href="{{ url_for('index', category=cat) }}" class="cat-card {% if category == cat %}active{% endif %}">
+            <a href="{{ url_for('index', category=cat, size=fsize, color=fcolor, min_price=fmin, max_price=fmax, sort=sort, sale='1' if sale else '') }}" class="cat-card {% if category == cat %}active{% endif %}">
                 {{ cat }}
             </a>
             {% endfor %}
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap mt-3">
+            <a href="{{ url_for('index', search=search, category=category, size=fsize, color=fcolor, min_price=fmin, max_price=fmax, sort='newest', sale='1' if sale else '') }}" class="fs-tab {% if sort=='newest' %}active{% endif %}">New Arrival</a>
+            <a href="{{ url_for('index', search=search, category=category, size=fsize, color=fcolor, min_price=fmin, max_price=fmax, sort='best', sale='1' if sale else '') }}" class="fs-tab {% if sort=='best' %}active{% endif %}">Bán chạy</a>
+            <a href="{{ url_for('index', search=search, category=category, size=fsize, color=fcolor, min_price=fmin, max_price=fmax, sort=sort, sale='1') }}" class="fs-tab {% if sale %}active{% endif %}">Mua 1 tặng 1</a>
         </div>
     </div>
 
-    <!-- GỢI Ý HÔM NAY & KẾT QUẢ TÌM KIẾM -->
-    <div class="d-flex align-items-end justify-content-between mb-3 mt-4">
-        <h4 class="fw-bold text-dark mb-0 text-uppercase border-start border-4 border-danger ps-3">
-            {% if search %} Kết Quả Cho "{{ search }}" {% else %} Gợi Ý Hôm Nay {% endif %}
-        </h4>
+    <!-- BỘ LỌC NÂNG CAO: size / màu / giá / sắp xếp -->
+    <div class="bg-white p-4 rounded-4 shadow-sm mb-4">
+        <h5 class="fw-bold mb-3 text-dark text-uppercase section-title">Lọc & Sắp xếp</h5>
+        <form method="GET" action="{{ url_for('index') }}" class="row g-2 align-items-end">
+            <input type="hidden" name="search" value="{{ search }}">
+            <input type="hidden" name="category" value="{{ category }}">
+            {% if sale %}<input type="hidden" name="sale" value="1">{% endif %}
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold">Size</label>
+                <select name="size" class="form-select form-select-sm">
+                    <option value="">Tất cả size</option>
+                    {% for s in sizes %}
+                    <option value="{{ s }}" {% if fsize == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold">Màu</label>
+                <select name="color" class="form-select form-select-sm">
+                    <option value="">Tất cả màu</option>
+                    {% for c in colors %}{% if c != 'Mặc định' %}
+                    <option value="{{ c }}" {% if fcolor == c %}selected{% endif %}>{{ c }}</option>
+                    {% endif %}{% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold">Giá từ</label>
+                <input type="number" name="min_price" class="form-control form-control-sm" min="0" step="1000" value="{{ fmin }}">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold">Đến</label>
+                <input type="number" name="max_price" class="form-control form-control-sm" min="0" step="1000" value="{{ fmax }}">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold">Sắp xếp</label>
+                <select name="sort" class="form-select form-select-sm">
+                    <option value="" {% if not sort %}selected{% endif %}>Nổi bật</option>
+                    <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Mới nhất</option>
+                    <option value="best" {% if sort == 'best' %}selected{% endif %}>Bán chạy</option>
+                    <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Giá tăng dần</option>
+                    <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Giá giảm dần</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-dark btn-sm fw-bold flex-grow-1 text-uppercase">Lọc</button>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm">Xóa</a>
+            </div>
+        </form>
     </div>
+
+    <!-- GỢI Ý HÔM NAY & KẾT QUẢ TÌM KIẾM -->
+    <div class="d-flex align-items-end justify-content-between mb-2 mt-4" id="goi-y">
+        <h4 class="fw-bold text-dark mb-0 text-uppercase section-title">
+            {% if search in ('nam', 'nữ') and category %}{{ category }} {{ search }}{% elif search %} Kết Quả Cho "{{ search }}" {% elif category %} {{ category }} {% elif sale %} Hàng sale {% else %} Gợi Ý Hôm Nay {% endif %}
+        </h4>
+        <span class="text-muted small">Tìm thấy {{ total_products or 0 }} sản phẩm</span>
+    </div>
+    {% if search or category or fsize or fcolor or fmin != '' or fmax != '' or sort or sale %}
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <span class="fs-cat-label align-self-center">Đang lọc:</span>
+        {% if search %}<a class="cat-card active" href="{{ url_for('index', category=category, size=fsize, color=fcolor, min_price=fmin, max_price=fmax, sort=sort, sale='1' if sale else '') }}">{% if search in ('nam', 'nữ') %}{{ search|capitalize }}{% else %}Tìm: {{ search }}{% endif %} ✕</a>{% endif %}
+        {% if category %}<a class="cat-card active" href="{{ url_for('index', search=search, size=fsize, color=fcolor, min_price=fmin, max_price=fmax, sort=sort, sale='1' if sale else '') }}">{{ category }} ✕</a>{% endif %}
+        {% if fsize %}<a class="cat-card active" href="{{ url_for('index', search=search, category=category, color=fcolor, min_price=fmin, max_price=fmax, sort=sort, sale='1' if sale else '') }}">Size {{ fsize }} ✕</a>{% endif %}
+        {% if fcolor %}<a class="cat-card active" href="{{ url_for('index', search=search, category=category, size=fsize, min_price=fmin, max_price=fmax, sort=sort, sale='1' if sale else '') }}">Màu {{ fcolor }} ✕</a>{% endif %}
+        {% if fmin != '' %}<a class="cat-card active" href="{{ url_for('index', search=search, category=category, size=fsize, color=fcolor, max_price=fmax, sort=sort, sale='1' if sale else '') }}">Từ {{ fmin }} ✕</a>{% endif %}
+        {% if fmax != '' %}<a class="cat-card active" href="{{ url_for('index', search=search, category=category, size=fsize, color=fcolor, min_price=fmin, sort=sort, sale='1' if sale else '') }}">Đến {{ fmax }} ✕</a>{% endif %}
+        {% if sort %}<a class="cat-card active" href="{{ url_for('index', search=search, category=category, size=fsize, color=fcolor, min_price=fmin, max_price=fmax, sale='1' if sale else '') }}">{% if sort == 'newest' %}Mới nhất{% elif sort == 'best' %}Bán chạy{% elif sort == 'price_asc' %}Giá tăng dần{% elif sort == 'price_desc' %}Giá giảm dần{% endif %} ✕</a>{% endif %}
+        {% if sale %}<a class="cat-card active" href="{{ url_for('index', search=search, category=category, size=fsize, color=fcolor, min_price=fmin, max_price=fmax, sort=sort) }}">Sale ✕</a>{% endif %}
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm rounded-pill">Xóa hết</a>
+    </div>
+    {% endif %}
 
     <!-- DANH SÁCH SẢN PHẨM -->
     <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3">
@@ -70,8 +158,12 @@
         <div class="col">
             <div class="card h-100 shadow-sm rounded-4 product-card position-relative">
                 
-                <!-- Huy hiệu HOT cho các sản phẩm is_featured (Cường tự code backend) -->
-                {% if product.is_featured == 1 %}
+                <!-- Huy hiệu HOT / SALE -->
+                {% if product.on_sale %}
+                <div class="position-absolute top-0 start-0 m-2 z-1">
+                    <span class="badge badge-sale rounded-pill px-2 py-1" style="font-size: 0.7rem;">-{{ product.discount_pct }}%</span>
+                </div>
+                {% elif product.is_featured == 1 %}
                 <div class="position-absolute top-0 start-0 m-2 z-1">
                     <span class="badge bg-danger rounded-pill px-2 py-1" style="font-size: 0.7rem;">Hot 🔥</span>
                 </div>
@@ -85,34 +177,45 @@
                     </form>
                 </div>
                 {% endif %}
+                <span class="fs-badge-gift" title="Quà tặng kèm">🎁</span>
 
                 <a href="{{ url_for('product_detail', product_id=product.id) }}" class="text-decoration-none">
-                    <img src="{{ product.image }}" class="card-img-top product-img" alt="{{ product.name }}">
+                    <img src="{{ product.image }}" class="card-img-top product-img" alt="{{ product.name }}" loading="lazy">
                 </a>
+                <div class="fs-actions px-2">
+                    <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST" class="m-0 flex-fill d-flex">
+                        <button type="submit" class="btn btn-dark w-100">Thêm vào giỏ</button>
+                    </form>
+                    <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-light border flex-fill text-center">Xem nhanh</a>
+                </div>
                 
                 <div class="card-body d-flex flex-column p-3">
                     <small class="text-muted mb-1 fw-semibold" style="font-size: 0.7rem;">{{ product.category }}</small>
                     <a href="{{ url_for('product_detail', product_id=product.id) }}" class="text-dark text-decoration-none mb-2">
                         <div class="fw-semibold text-truncate" style="font-size: 0.9rem;">{{ product.name }}</div>
                     </a>
-                    <div class="mt-auto d-flex align-items-center justify-content-between">
-                        <span class="price-tag">{{ '{:,.0f}'.format(product.price) }} ₫</span>
-                        <span class="text-muted" style="font-size: 0.75rem;">Còn {{ product.stock }}</span>
-                    </div>
-                    
-                    <div class="mt-3">
-                        {% if product.stock > 0 %}
-                            <a href="{{ url_for('add_to_cart', product_id=product.id) }}" class="btn btn-outline-primary btn-sm w-100 rounded-pill fw-bold">🛒 Thêm giỏ</a>
+                    <div class="mt-auto">
+                        {% if product.on_sale %}
+                        <div><span class="text-muted text-decoration-line-through" style="font-size: 0.8rem;">{{ '{:,.0f}'.format(product.price) }} ₫</span>
+                        <span class="price-tag">{{ '{:,.0f}'.format(product.eff_price) }} ₫</span></div>
                         {% else %}
-                            <button class="btn btn-secondary btn-sm w-100 rounded-pill fw-bold" disabled>Hết hàng</button>
+                        <span class="price-tag">{{ '{:,.0f}'.format(product.eff_price) }} ₫</span>
                         {% endif %}
+                        <div class="text-muted" style="font-size: 0.75rem;">{% if sort == 'best' and product.sold %}<span class="fw-bold text-success">Đã bán {{ product.sold }}</span> | {% endif %}{% if product.stock > 0 %}Còn {{ product.stock }}{% else %}Hết hàng{% endif %}</div>
                     </div>
+                    {% if product.stock <= 0 %}
+                    <div class="mt-3">
+                        <button class="btn btn-secondary btn-sm w-100 rounded-pill fw-bold" disabled>Hết hàng</button>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
         {% else %}
         <div class="col-12 text-center py-5 w-100">
             <h5 class="text-muted mt-3">Không tìm thấy sản phẩm nào!</h5>
+            <p class="text-muted small">Thử nới giá, đổi size/màu hoặc xóa bớt điều kiện lọc.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-dark btn-sm rounded-pill px-4">Xóa hết bộ lọc</a>
         </div>
         {% endfor %}
     </div>
@@ -122,17 +225,17 @@
     <nav aria-label="Page navigation" class="mt-5">
         <ul class="pagination justify-content-center">
             <li class="page-item {% if page == 1 %}disabled{% endif %}">
-                <a class="page-link shadow-sm border-0 fw-bold text-dark" href="{{ url_for('index', page=page-1, search=search, category=category) }}">Trước</a>
+                <a class="page-link shadow-sm border-0 fw-bold text-dark" href="{{ url_for('index', page=page-1, search=search, category=category, size=fsize, color=fcolor, min_price=fmin, max_price=fmax, sort=sort, sale='1' if sale else '') }}">Trước</a>
             </li>
             
             {% for p in range(1, total_pages + 1) %}
             <li class="page-item {% if p == page %}active{% endif %}">
-                <a class="page-link shadow-sm border-0 {% if p == page %}fw-bold{% endif %}" href="{{ url_for('index', page=p, search=search, category=category) }}">{{ p }}</a>
+                <a class="page-link shadow-sm border-0 {% if p == page %}fw-bold{% endif %}" href="{{ url_for('index', page=p, search=search, category=category, size=fsize, color=fcolor, min_price=fmin, max_price=fmax, sort=sort, sale='1' if sale else '') }}">{{ p }}</a>
             </li>
             {% endfor %}
             
             <li class="page-item {% if page == total_pages %}disabled{% endif %}">
-                <a class="page-link shadow-sm border-0 fw-bold text-dark" href="{{ url_for('index', page=page+1, search=search, category=category) }}">Sau</a>
+                <a class="page-link shadow-sm border-0 fw-bold text-dark" href="{{ url_for('index', page=page+1, search=search, category=category, size=fsize, color=fcolor, min_price=fmin, max_price=fmax, sort=sort, sale='1' if sale else '') }}">Sau</a>
             </li>
         </ul>
     </nav>

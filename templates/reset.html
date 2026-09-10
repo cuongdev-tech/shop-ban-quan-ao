@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="row justify-content-center mt-4 mb-5">
+  <div class="col-md-5">
+    <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+      <div class="text-center mb-4">
+        <h3 class="fw-bold text-dark text-uppercase">Đặt mật khẩu mới</h3>
+        <p class="text-muted small">Link hiệu lực 1 giờ, dùng 1 lần là đủ</p>
+      </div>
+      <form method="POST" action="{{ url_for('reset_password', token=token) }}">
+        <div class="mb-3">
+          <label class="form-label fw-semibold text-secondary small">Mật khẩu mới (tối thiểu 6 ký tự)</label>
+          <input type="password" name="new_password" class="form-control bg-light border-0 py-2" required minlength="6" placeholder="••••••••">
+        </div>
+        <div class="mb-4">
+          <label class="form-label fw-semibold text-secondary small">Nhập lại mật khẩu mới</label>
+          <input type="password" name="confirm_password" class="form-control bg-light border-0 py-2" required minlength="6" placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-dark w-100 rounded-pill fw-bold shadow-sm">Lưu mật khẩu</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

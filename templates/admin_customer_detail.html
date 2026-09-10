@@ -7,8 +7,8 @@
     <a href="{{ url_for('admin_customers') }}" class="btn btn-outline-secondary btn-sm fw-bold mb-3 px-3" style="border-radius: 10px;">
       ← Quay lại danh sách khách hàng
     </a>
-    <h2>Chi tiết khách hàng</h2>
-    <p class="text-muted">{{ customer.fullname }} — {{ customer.phone }} — {{ customer.email }}</p>
+    <h2 class="fw-bold text-dark text-uppercase">Chi tiết khách hàng bigsize</h2>
+    <p class="text-muted small">{{ customer.fullname }} — {{ customer.phone }} — {{ customer.email }} — Tích điểm + Đổi 14 ngày</p>
     
     <div class="row g-3">
       <div class="col-md-4">
@@ -48,10 +48,10 @@
           <div class="accordion-body bg-light">
             <p class="mb-3"><strong>Địa chỉ:</strong> {{ order.address }}</p>
             <ul class="list-group mb-3 shadow-sm">
-              <!-- ĐÃ SỬA THÀNH order_details Ở ĐÂY 👇 -->
+              
               {% for item in order.order_details %}
               <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                <div> {{ item.name }} <span class="text-muted">x {{ item.quantity }}</span></div>
+                <div> {{ item.name }}{% if item.variant_size %} <small class="text-muted">({{ item.variant_size }}/{{ item.variant_color }})</small>{% else %} <small class="text-muted">(bản thường)</small>{% endif %} <span class="text-muted">x {{ item.quantity }}</span></div>
                 <div class="fw-bold text-primary">{{ '{:,.0f}'.format(item.unit_price) }} đ</div>
               </li>
               {% endfor %}

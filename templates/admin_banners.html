@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold text-uppercase mb-0">Banner / Slider trang chủ</h3>
+    <a href="{{ url_for('admin_banner_add') }}" class="btn btn-dark rounded-pill px-4 fw-bold">+ Thêm</a>
+  </div>
+  <div class="card border-0 shadow-sm bg-white" style="border-radius:14px;overflow:hidden;">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-light"><tr><th class="ps-4">Ảnh</th><th>Tiêu đề / Link</th><th class="text-center">Thứ tự</th><th class="text-center">Hiện</th><th class="text-end pe-4">Thao tác</th></tr></thead>
+      <tbody>
+        {% for b in rows %}
+        <tr><td class="ps-4"><img src="{{ b.image }}" style="width:120px;height:50px;object-fit:cover;" class="rounded border"></td>
+        <td class="small">{{ b.title or '' }}<br><span class="text-muted">{{ b.link or '' }}</span></td>
+        <td class="text-center">{{ b.sort_order }}</td><td class="text-center">{% if b.is_active %}<span class="badge bg-success">Hiện</span>{% else %}<span class="badge bg-secondary">Ẩn</span>{% endif %}</td>
+        <td class="text-end pe-4"><a href="{{ url_for('admin_banner_edit', bid=b.id) }}" class="btn btn-outline-dark btn-sm rounded-pill">Sửa</a>
+        <form action="{{ url_for('admin_banner_delete', bid=b.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Xóa banner?');"><button class="btn btn-outline-danger btn-sm rounded-pill" type="submit">Xóa</button></form></td></tr>
+        {% else %}<tr><td colspan="5" class="text-center text-muted py-4">Chưa có banner.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

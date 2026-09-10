@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <h3 class="fw-bold text-uppercase mb-3">Trang nội dung (8 trang tĩnh)</h3>
+  <div class="card border-0 shadow-sm bg-white" style="border-radius:14px;overflow:hidden;">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-light"><tr><th class="ps-4">Slug</th><th>Tiêu đề</th><th>Cập nhật</th><th class="text-end pe-4">Sửa</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr><td class="ps-4 fw-bold">{{ r.slug }}</td><td>{{ r.title }}</td><td class="small text-muted">{{ r.updated_at }}</td>
+        <td class="text-end pe-4"><a href="{{ url_for('admin_page_edit', slug=r.slug) }}" class="btn btn-dark btn-sm rounded-pill px-3 fw-bold">Sửa</a>
+        <a href="{{ url_for('static_page', slug=r.slug) }}" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill">Xem</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

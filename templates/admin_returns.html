@@ -1,0 +1,60 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <div class="mb-4">
+    <h3 class="fw-bold text-dark text-uppercase">Duyệt đổi size 14 ngày</h3>
+    <p class="text-muted small mb-0">Ngang giá cùng SP - Còn tem + hóa đơn - COD chịu ship 2 chiều - Sale/Phụ kiện không đổi</p>
+  </div>
+  <div class="mb-3 d-flex gap-2">
+    <a href="{{ url_for('admin_returns') }}" class="btn btn-sm rounded-pill {% if not status %}btn-dark{% else %}btn-outline-secondary{% endif %} fw-bold">Tất cả</a>
+    {% for s in ['Chờ duyệt', 'Hoàn thành', 'Từ chối'] %}
+    <a href="{{ url_for('admin_returns', status=s) }}" class="btn btn-sm rounded-pill {% if status == s %}btn-dark{% else %}btn-outline-secondary{% endif %} fw-bold">{{ s }} ({{ counts[s] }})</a>
+    {% endfor %}
+  </div>
+  <div class="card border-0 shadow-sm bg-white p-0" style="border-radius: 14px; overflow: hidden;">
+    <div class="table-responsive">
+      <table class="table table-admin table-hover mb-0 align-middle">
+        <thead>
+          <tr>
+            <th class="ps-4">Yêu cầu</th>
+            <th>Khách & Đơn</th>
+            <th>Sản phẩm</th>
+            <th class="text-center">Đổi</th>
+            <th class="text-center">Trạng thái</th>
+            <th class="text-center pe-4">Duyệt</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+          <tr>
+            <td class="ps-4"><b>#EX-{{ r.id }}</b><br><small class="text-muted">{{ r.created_at }}</small>{% if r.reason %}<br><small class="fst-italic">“{{ r.reason }}”</small>{% endif %}</td>
+            <td><div class="fw-bold">{{ r.fullname }}</div><div class="text-muted small">{{ r.phone }}</div><div><a href="{{ url_for('admin_order_detail', order_id=r.order_id) }}" class="small">#ORD-{{ r.order_id }}</a> <small class="text-muted">({{ r.order_status }})</small></div></td>
+            <td>{{ r.pname }} <span class="text-muted small">x{{ r.quantity }}</span></td>
+            <td class="text-center small"><span class="badge bg-light text-dark border">{{ r.osize }}/{{ r.ocolor }}</span> → <span class="badge bg-primary-subtle text-primary border border-primary">{{ r.nsize }}/{{ r.ncolor }}</span></td>
+            <td class="text-center">
+              {% if r.status == 'Chờ duyệt' %}<span class="badge bg-warning-subtle text-warning border border-warning rounded-pill px-3">Chờ duyệt</span>
+              {% elif r.status == 'Hoàn thành' %}<span class="badge bg-success-subtle text-success border border-success rounded-pill px-3">Hoàn thành</span>
+              {% else %}<span class="badge bg-secondary-subtle text-secondary border rounded-pill px-3">Từ chối</span>{% endif %}
+            </td>
+            <td class="text-center pe-4">
+              {% if r.status == 'Chờ duyệt' %}
+              <form action="{{ url_for('admin_approve_return', req_id=r.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Duyệt đổi size #EX-{{ r.id }}? Kho sẽ tự động đổi.');">
+                <button type="submit" class="btn btn-dark btn-sm rounded-pill fw-bold px-3 text-uppercase">Duyệt</button>
+              </form>
+              <form action="{{ url_for('admin_reject_return', req_id=r.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Từ chối yêu cầu này?');">
+                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill fw-bold px-3">Từ chối</button>
+              </form>
+              {% else %}
+              <span class="text-muted small">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="text-center py-5 text-muted">Không có yêu cầu nào.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

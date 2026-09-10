@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FashionShop — mua sắm thời trang online: áo, quần, váy, sale mỗi ngày.">
     <title>Fashion Shop</title>
-    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>">
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Fonts: Quicksand -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap Icons (Thư viện Icon chuyên nghiệp) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Theme chung FashionShop -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     
     <style>
         /* Đặt Font chữ và màu nền cho toàn website */
@@ -23,7 +27,7 @@
         /* CSS tinh chỉnh Navbar */
         .navbar { border-bottom: 1px solid #ebebeb; }
         .nav-link { font-weight: 600; color: #495057 !important; transition: color 0.2s; }
-        .nav-link:hover { color: #0d6efd !important; }
+        .nav-link:hover { color: #c23358 !important; }
         .search-bar { background: #f0f2f5; border: none; font-weight: 500; font-family: 'Quicksand', sans-serif; }
         .search-bar:focus { box-shadow: none; background: #e9ecef; }
         .badge-notification { font-size: 0.6rem; padding: 0.35em 0.5em; top: 8px !important; }
@@ -38,11 +42,16 @@
 </head>
 <body>
 
-    <!-- NAVBAR CHUYÊN NGHIỆP -->
+    <!-- TOPBAR KHUYEN MAI -->
+    <div class="fs-topbar text-center py-2 px-3">
+        <span>Mua 2 tặng 1</span><span>Freeship nội thành</span><span class="d-none d-md-inline">Đổi 14 ngày còn tem</span><span class="d-none d-md-inline">Hotline 1900 8888</span>
+    </div>
+
+    <!-- NAVBAR CHUYEN NGHIỆP -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top py-3">
         <div class="container-xl">
             <!-- Logo -->
-            <a class="navbar-brand fw-bold text-primary fs-4 d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+            <a class="navbar-brand fw-bold fs-4 d-flex align-items-center gap-2 logo-brand" href="{{ url_for('index') }}">
                 <i class="bi bi-bag-heart-fill fs-3"></i> FashionShop
             </a>
             
@@ -51,22 +60,38 @@
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- Thanh tìm kiếm -->
-                <form class="d-flex mx-auto my-3 my-lg-0" style="max-width: 450px; width: 100%;" action="{{ url_for('index') }}" method="GET">
+                <!-- Thanh tìm kiếm + gợi ý hot -->
+                <div class="mx-auto my-3 my-lg-0 position-relative" style="max-width: 450px; width: 100%;">
+                <form class="d-flex" action="{{ url_for('index') }}" method="GET" autocomplete="off">
                     <div class="input-group">
-                        <input class="form-control rounded-start-pill search-bar px-4" type="search" name="search" placeholder="Bạn tìm gì hôm nay?..." value="{{ request.args.get('search', '') }}">
-                        <button class="btn btn-primary rounded-end-pill px-4" type="submit"><i class="bi bi-search"></i></button>
+                        <input id="live-search" class="form-control rounded-start-pill search-bar px-4" type="search" name="search" placeholder="Bạn tìm gì hôm nay?..." value="{{ request.args.get('search', '') }}">
+                        <button class="btn btn-dark rounded-end-pill px-4" type="submit"><i class="bi bi-search"></i></button>
                     </div>
                 </form>
+                <div id="search-suggest" class="list-group position-absolute w-100 shadow d-none" style="z-index:1060;top:100%;"></div>
+                <div class="small mt-1 text-truncate">Hot:
+                    {% for kw in hot_keywords %}
+                    <a href="{{ url_for('index', search=kw) }}" class="badge bg-light text-dark border text-decoration-none me-1">{{ kw }}</a>
+                    {% endfor %}
+                </div>
+                </div>
 
                 <ul class="navbar-nav ms-auto align-items-center gap-3">
-                    <!-- Danh mục -->
+                    <!-- Danh mục 2 tầng -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             <i class="bi bi-grid-fill me-1"></i> Danh mục
                         </a>
-                        <ul class="dropdown-menu border-0 shadow-sm mt-3 rounded-3">
+                        <ul class="dropdown-menu border-0 shadow-sm mt-3 rounded-3" style="max-height: 70vh; overflow-y: auto; min-width: 240px;">
                             <li><a class="dropdown-item fw-semibold py-2" href="{{ url_for('index') }}">Tất cả sản phẩm</a></li>
+                            {% for grp in menu_tree %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item fw-bold py-2 text-uppercase small" href="{{ url_for('index', category=grp.category, search=grp.search) }}">{{ grp.label }}</a></li>
+                            {% for ch in grp.children %}
+                            <li><a class="dropdown-item fw-semibold py-2 ps-4" href="{{ url_for('index', category=ch.category, search=ch.search) }}">– {{ ch.label }}</a></li>
+                            {% endfor %}
+                            {% endfor %}
+                            <li><hr class="dropdown-divider"></li>
                             {% for cat in categories %}
                             <li><a class="dropdown-item fw-semibold py-2" href="{{ url_for('index', category=cat) }}">{{ cat }}</a></li>
                             {% endfor %}
@@ -99,52 +124,151 @@
                         </a>
                     </li>
 
+                    <!-- CHUÔNG THÔNG BÁO -->
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown" title="Thông báo">
+                            <i class="bi bi-bell fs-5"></i>
+                            {% if notif_count and notif_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger badge-notification">{{ notif_count }}</span>
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-3 rounded-3 p-2" style="min-width:280px;">
+                            <li><a class="dropdown-item fw-bold" href="{{ url_for('notifications') }}"><i class="bi bi-bell me-2"></i>Thông báo{% if notif_count %} ({{ notif_count }} mới){% endif %}</a></li>
+                            {% if expiring_vouchers %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header small">Voucher sắp hết hạn</h6></li>
+                            {% for v in expiring_vouchers %}
+                            <li><span class="dropdown-item-text small"><b>{{ v.code }}</b> hết hạn {{ v.expires_at }}</span></li>
+                            {% endfor %}
+                            {% endif %}
+                        </ul>
+                    </li>
+                    {% endif %}
+
                     <!-- TÀI KHOẢN VÀ MENU PHÂN QUYỀN -->
                     {% if current_user.is_authenticated %}
                         <li class="nav-item dropdown ms-2 border-start ps-3">
                             <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown">
-                                <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 32px; height: 32px;">
+                                <div class="bg-dark text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 32px; height: 32px;">
                                     <i class="bi bi-person-fill"></i>
                                 </div>
                                 <span>{{ current_user.name }}</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-3 rounded-3 p-2">
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-3 rounded-3 p-2" style="max-height: 70vh; overflow-y: auto; min-width: 260px;">
                                 
-                                <!-- VÙNG QUẢN LÝ -->
+                                <!-- NHÓM 1: BÁN HÀNG (NV + Admin) -->
                                 {% if current_user.is_admin == 1 or current_user.role == 'Nhân viên' %}
-                                <li><h6 class="dropdown-header text-uppercase fw-bold text-success small">Khu vực Quản lý</h6></li>
+                                <li><h6 class="dropdown-header text-uppercase fw-bold text-success small">Bán hàng</h6></li>
                                 <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_dashboard') }}"><i class="bi bi-pie-chart me-2"></i>Tổng quan Shop</a></li>
-                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_products') }}"><i class="bi bi-box-seam me-2"></i>Quản lý Sản phẩm</a></li>
                                 <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_orders') }}"><i class="bi bi-receipt me-2"></i>Quản lý Đơn hàng</a></li>
-                                
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_returns') }}"><i class="bi bi-arrow-repeat me-2"></i>Duyệt đổi size</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_exchange_instore') }}"><i class="bi bi-upc-scan me-2"></i>Đổi tại quầy</a></li>
+
                                 {% if current_user.is_admin == 1 %}
+                                <li><hr class="dropdown-divider"></li>
+
+                                <!-- NHÓM 2: HÀNG HÓA & KM (admin) -->
+                                <li><h6 class="dropdown-header text-uppercase fw-bold text-primary small">Hàng hóa &amp; Khuyến mãi</h6></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_products') }}"><i class="bi bi-box-seam me-2"></i>Quản lý Sản phẩm</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_vouchers') }}"><i class="bi bi-ticket-perforated me-2"></i>Quản lý Mã giảm giá</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_combos') }}"><i class="bi bi-stars me-2"></i>Combo hẹn giờ</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_gifts') }}"><i class="bi bi-gift me-2"></i>Quà tặng</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_collections') }}"><i class="bi bi-collection me-2"></i>Collections</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_posts') }}"><i class="bi bi-journal-text me-2"></i>Bài phối đồ</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_banners') }}"><i class="bi bi-image me-2"></i>Banner/Slider</a></li>
+                                <li><hr class="dropdown-divider"></li>
+
+                                <!-- NHÓM 3: KHÁCH HÀNG (admin) -->
+                                <li><h6 class="dropdown-header text-uppercase fw-bold text-warning small">Khách hàng</h6></li>
                                 <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_customers') }}"><i class="bi bi-people me-2"></i>Quản lý Khách hàng</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_reviews') }}"><i class="bi bi-star me-2"></i>Duyệt đánh giá</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_subscribers') }}"><i class="bi bi-envelope me-2"></i>Nhận tin KM</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_contacts') }}"><i class="bi bi-chat me-2"></i>Tin nhắn LH</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_jobs') }}"><i class="bi bi-briefcase me-2"></i>Tuyển dụng</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_applications') }}"><i class="bi bi-inbox me-2"></i>Hồ sơ ứng tuyển</a></li>
+                                <li><hr class="dropdown-divider"></li>
+
+                                <!-- NHÓM 4: HỆ THỐNG & BÁO CÁO (admin, trừ Doanh thu NV cũng thấy) -->
+                                <li><h6 class="dropdown-header text-uppercase fw-bold text-secondary small">Hệ thống &amp; Báo cáo</h6></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_stock_report') }}"><i class="bi bi-bar-chart me-2"></i>Báo cáo Tồn/Size/Màu</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_report_channel') }}"><i class="bi bi-diagram-3 me-2"></i>BC Chi nhánh/Kênh</a></li>
+                                {% endif %}
+
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_transactions') }}"><i class="bi bi-cash-coin me-2"></i>Báo cáo Doanh thu</a></li>
+
+                                {% if current_user.is_admin == 1 %}
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_pages') }}"><i class="bi bi-file-text me-2"></i>Trang nội dung</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_stores') }}"><i class="bi bi-shop me-2"></i>Cửa hàng</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_settings') }}"><i class="bi bi-gear me-2"></i>Cấu hình ship/quà</a></li>
+                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_staff_logs') }}"><i class="bi bi-journal-check me-2"></i>Nhật ký NV/Hoa hồng</a></li>
                                 <li><a class="dropdown-item py-2 rounded text-danger" href="{{ url_for('admin_users') }}"><i class="bi bi-shield-lock me-2"></i>Quản lý Tài khoản</a></li>
                                 {% endif %}
-                                
-                                <li><a class="dropdown-item py-2 rounded" href="{{ url_for('admin_transactions') }}"><i class="bi bi-cash-coin me-2"></i>Báo cáo Doanh thu</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 {% endif %}
                                 
                                 <!-- DÀNH CHO CÁ NHÂN -->
                                 <li><a class="dropdown-item py-2 rounded" href="{{ url_for('profile') }}"><i class="bi bi-person-lines-fill me-2"></i>Trang cá nhân</a></li>
                                 
-                                {% if current_user.is_admin == 1 or current_user.role == 'Khách hàng' %}
+                                {% if current_user.role == 'Khách hàng' %}
                                 <li><a class="dropdown-item py-2 rounded" href="{{ url_for('my_orders') }}"><i class="bi bi-bag-check me-2"></i>Đơn hàng của tôi</a></li>
                                 {% endif %}
                                 
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item py-2 rounded text-danger fw-bold" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+                                <li>
+                                    <form action="{{ url_for('logout') }}" method="POST" class="px-2">
+                                        <button type="submit" class="dropdown-item py-2 rounded text-danger fw-bold"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</button>
+                                    </form>
+                                </li>
                             </ul>
                         </li>
                     {% else %}
                         <li class="nav-item ms-2 border-start ps-3"><a class="nav-link" href="{{ url_for('login') }}">Đăng nhập</a></li>
-                        <li class="nav-item"><a class="btn btn-primary rounded-pill px-4 ms-2 fw-bold shadow-sm" href="{{ url_for('register') }}">Đăng ký</a></li>
+                        <li class="nav-item"><a class="btn btn-dark rounded-pill px-4 ms-2 fw-bold shadow-sm" href="{{ url_for('register') }}">Đăng ký</a></li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
+    <!-- MENU theo vai: staff chỉ thấy mục bán hàng + tra cứu; khách thấy full mua sắm -->
+    {% set _staff = current_user.is_authenticated and (current_user.is_admin == 1 or current_user.role == 'Nhân viên') %}
+    {% set _admin = current_user.is_authenticated and current_user.is_admin == 1 %}
+    <div class="fs-menu border-bottom">
+        <div class="container-xl d-flex gap-1 gap-md-3 flex-wrap py-2 align-items-center">
+            {% if _staff %}
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('index') }}">Bán hàng</a>
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('admin_orders') }}">Đơn hàng</a>
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('admin_exchange_instore') }}">Đổi tại quầy</a>
+            {% if _admin %}
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('admin_products') }}">Sản phẩm</a>
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('admin_transactions') }}">Doanh thu</a>
+            {% endif %}
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('size_guide') }}">Bảng size</a>
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('store_list') }}">Cửa hàng</a>
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('static_page', slug='doi-hang') }}">Đổi hàng</a>
+            {% else %}
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('index') }}">Trang chủ</a>
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('index', sort='newest') }}">Sản phẩm mới</a>
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('index', sort='best') }}">Bán chạy</a>
+            {% for grp in menu_tree %}
+            <div class="fs-drop">
+                <a class="nav-link px-2 text-nowrap" href="{{ url_for('index', category=grp.category, search=grp.search) }}">{{ grp.label }} ▾</a>
+                <div class="fs-sub shadow-sm rounded-3">
+                    {% for ch in grp.children %}
+                    <a class="dropdown-item fw-semibold py-2" href="{{ url_for('index', category=ch.category, search=ch.search) }}">{{ ch.label }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('size_guide') }}">Bảng size</a>
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('store_list') }}">Cửa hàng</a>
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('collection_list') }}">Collection</a>
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('post_list') }}">Phối đồ</a>
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('job_list') }}">Tuyển dụng</a>
+            <a class="nav-link px-2 text-nowrap" href="{{ url_for('static_page', slug='doi-hang') }}">Đổi hàng</a>
+            {% endif %}
+        </div>
+    </div>
 
     <!-- HIỂN THỊ THÔNG BÁO FLASH -->
     <div class="container-xl mt-3 position-relative" style="z-index: 1000;">
@@ -166,76 +290,180 @@
         {% block content %}{% endblock %}
     </div>
 
-    <!-- FOOTER CHUYÊN NGHIỆP -->
-    <footer class="bg-dark text-white pt-5 pb-3 mt-5">
+    {# Admin/NV là màn hình làm việc (bán + quản trị): ẩn footer cho gọn, chỉ khách mới thấy #}
+    {% set is_work_user = current_user.is_authenticated and (current_user.is_admin == 1 or current_user.role == 'Nhân viên') %}
+    {% if not (request.path.startswith('/admin') or is_work_user) %}
+    <!-- FOOTER DEN (trang khach) -->
+    <footer class="pt-5 pb-3 mt-5" style="background:#111;">
         <div class="container-xl">
             <div class="row gy-4 mb-4">
-                <!-- Cột 1: Thông Thiết kế -->
+                <!-- Cot 1: Ve -->
                 <div class="col-lg-4 col-md-6">
                     <h4 class="fw-bold text-white mb-3 d-flex align-items-center gap-2">
-                        <i class="bi bi-bag-heart-fill text-primary"></i> FashionShop
+                        <i class="bi bi-bag-heart-fill"></i> FashionShop
                     </h4>
-                    <p class="text-secondary small pe-lg-4" style="line-height: 1.6;">
-                        Hệ thống mua sắm thời trang trực tuyến hàng đầu. Chúng tôi cam kết mang đến những sản phẩm chất lượng, đón đầu xu hướng với dịch vụ tận tâm nhất.
+                    <p class="small pe-lg-4" style="line-height: 1.6; color:#bbb;">
+                        Thương hiệu thời trang với hệ thống cửa hàng từ Bắc - Nam. Chất lượng - vừa vặn - giá cạnh tranh. Cho kiểm hàng trước khi nhận, đổi trong 14 ngày còn tem mác và hóa đơn.
                     </p>
-                    <div class="mt-4">
-                        <a href="#" class="social-icon"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="social-icon"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="social-icon"><i class="bi bi-tiktok"></i></a>
-                        <a href="#" class="social-icon"><i class="bi bi-youtube"></i></a>
+                    <div class="mt-3 d-flex gap-2">
+                        <span class="badge bg-light text-dark">GHN</span>
+                        <span class="badge bg-light text-dark">COD</span>
+                        <span class="badge bg-light text-dark">CK-QR</span>
+                    </div>
+                    <div class="mt-3">
+                        <a href="https://facebook.com" target="_blank" rel="noopener" class="social-icon"><i class="bi bi-facebook"></i></a>
+                        <a href="https://instagram.com" target="_blank" rel="noopener" class="social-icon"><i class="bi bi-instagram"></i></a>
+                        <a href="https://tiktok.com" target="_blank" rel="noopener" class="social-icon"><i class="bi bi-tiktok"></i></a>
+                        <a href="https://youtube.com" target="_blank" rel="noopener" class="social-icon"><i class="bi bi-youtube"></i></a>
                     </div>
                 </div>
 
-                <!-- Cột 2: Chính sách -->
+                <!-- Cot 2: Lien he hop tac -->
                 <div class="col-lg-2 col-md-6">
-                    <h5 class="footer-title">Về Chúng Tôi</h5>
-                    <a href="#" class="footer-link small">Giới thiệu FashionShop</a>
-                    <a href="#" class="footer-link small">Chính sách bảo mật</a>
-                    <a href="#" class="footer-link small">Điều khoản dịch vụ</a>
-                    <a href="#" class="footer-link small">Tuyển dụng</a>
+                    <h5 class="footer-title">Liên hệ hợp tác</h5>
+                    <span class="footer-link small">39 Đào Công Chính, Khuê Trung, Đà Nẵng</span>
+                    <span class="footer-link small">1900 8888 (8:00 - 22:00)</span>
+                    <span class="footer-link small">support@fashionshop.vn</span>
+                    <span class="footer-link small">Cửa hàng tại Đà Nẵng</span>
                 </div>
 
-                <!-- Cột 3: Hỗ trợ khách hàng -->
-                <div class="col-lg-3 col-md-6">
-                    <h5 class="footer-title">Hỗ Trợ Khách Hàng</h5>
-                    <a href="#" class="footer-link small">Trung tâm trợ giúp</a>
-                    <a href="#" class="footer-link small">Hướng dẫn mua hàng</a>
-                    <a href="#" class="footer-link small">Chính sách đổi trả</a>
-                    <a href="#" class="footer-link small">Tra cứu đơn hàng</a>
+                <!-- Cot 3: Ho tro -->
+                <div class="col-lg-3 col-md-6" id="chinh-sach">
+                    <h5 class="footer-title">Hỗ trợ - Chính sách</h5>
+                    {% for slug, title in static_pages %}
+                    <a href="{{ url_for('static_page', slug=slug) }}" class="footer-link small">{{ title }}</a>
+                    {% endfor %}
+                    <a href="{{ url_for('size_guide') }}" class="footer-link small">Bảng size + gợi ý chọn size</a>
+                    <a href="{{ url_for('store_list') }}" class="footer-link small">Hệ thống cửa hàng</a>
+                    <a href="{{ url_for('collection_list') }}" class="footer-link small">Collection theo mùa</a>
+                    <a href="{{ url_for('post_list') }}" class="footer-link small">Bài phối đồ</a>
+                    <a href="{{ url_for('job_list') }}" class="footer-link small">Tuyển dụng</a>
+                    <a href="{{ url_for('bank_guide') }}" class="footer-link small">Hướng dẫn chuyển khoản</a>
+                    <span class="footer-link small">Kiểm hàng trước khi nhận - Sale/Phụ kiện không đổi</span>
                 </div>
 
-                <!-- Cột 4: Thông tin liên hệ -->
+                <!-- Cot 4: Dang ky nhan tin -->
                 <div class="col-lg-3 col-md-6">
-                    <h5 class="footer-title">Liên Hệ</h5>
-                    <div class="d-flex align-items-start mb-2">
-                        <i class="bi bi-geo-alt-fill text-primary mt-1 me-2"></i>
-                        <span class="small text-secondary">02 Chơn Tâm 9, Quận Liên Chiểu, TP. Đà Nẵng</span>
-                    </div>
-                    <div class="d-flex align-items-center mb-2">
-                        <i class="bi bi-telephone-fill text-primary me-2"></i>
-                        <span class="small text-secondary">1900 8888 (8:00 - 22:00)</span>
-                    </div>
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="bi bi-envelope-fill text-primary me-2"></i>
-                        <span class="small text-secondary">support@fashionshop.vn</span>
-                    </div>
-                    <h6 class="text-white small fw-bold mb-2">Thanh toán an toàn</h6>
-                    <div class="d-flex gap-2">
-                        <i class="bi bi-credit-card fs-3 text-secondary"></i>
-                        <i class="bi bi-wallet2 fs-3 text-secondary"></i>
-                        <i class="bi bi-cash-coin fs-3 text-secondary"></i>
+                    <h5 class="footer-title">Đăng ký nhận tin</h5>
+                    <p class="small" style="color:#bbb;">Cập nhật sản phẩm mới, ưu đãi và giảm giá khác.</p>
+                    <form class="d-flex gap-2" action="{{ url_for('subscribe') }}" method="POST">
+                        <input class="form-control form-control-sm" type="email" name="email" required placeholder="Email của bạn...">
+                        <button class="btn btn-light btn-sm fw-bold" type="submit">Đăng ký</button>
+                    </form>
+                    <div class="mt-3 small" style="color:#bbb;">
+                        <div><i class="bi bi-telephone me-2"></i>Hotline +84987799353</div>
+                        <div><i class="bi bi-chat me-2"></i>Tư vấn Messenger / Zalo</div>
+                        <div><i class="bi bi-shop me-2"></i>Cửa hàng Đà Nẵng</div>
                     </div>
                 </div>
             </div>
 
             <hr class="border-secondary mb-3">
             <div class="text-center text-secondary small">
-                © 2026 Fashion Shop. Thiết kế và vận hành bởi đội ngũ phát triển. All rights reserved.
+                © 2026 Fashion Shop. Kiểm hàng trước khi nhận - Đổi 14 ngày còn tem. All rights reserved.
             </div>
         </div>
     </footer>
+    {% endif %}
 
+    <!-- Nút nổi hotline/Messenger/Zalo + form lời nhắn (chỉ khách; staff trả lời trong trang quản trị) -->
+    {% if not (current_user.is_authenticated and (current_user.is_admin == 1 or current_user.role == 'Nhân viên')) %}
+    <div class="position-fixed bottom-0 end-0 p-3 d-flex flex-column gap-2" style="z-index:1050;">
+        <a href="tel:19008888" class="btn btn-danger rounded-circle shadow" title="Hotline 1900 8888"><i class="bi bi-telephone-fill"></i></a>
+        <a href="https://m.me/fashionshop" target="_blank" rel="noopener" class="btn btn-primary rounded-circle shadow" title="Messenger"><i class="bi bi-messenger"></i></a>
+        <a href="https://zalo.me/0987799353" target="_blank" rel="noopener" class="btn btn-success rounded-circle shadow" title="Zalo"><i class="bi bi-chat-dots-fill"></i></a>
+        <button class="btn btn-dark rounded-circle shadow" data-bs-toggle="modal" data-bs-target="#contactModal" title="Để lại lời nhắn"><i class="bi bi-envelope-fill"></i></button>
+    </div>
+    <div class="modal fade" id="contactModal" tabindex="-1">
+      <div class="modal-dialog">
+        <form class="modal-content" action="{{ url_for('contact_post') }}" method="POST">
+          <div class="modal-header"><h6 class="modal-title fw-bold">Để lại lời nhắn</h6><button class="btn-close" data-bs-dismiss="modal" type="button"></button></div>
+          <div class="modal-body d-flex flex-column gap-2">
+            <input name="name" class="form-control" required maxlength="100" placeholder="Tên của bạn *">
+            <input name="phone" class="form-control" required maxlength="20" placeholder="SĐT *">
+            <textarea name="message" class="form-control" required maxlength="1000" rows="3" placeholder="Cần tư vấn size, đơn hàng... *"></textarea>
+            {% if recaptcha_site_key %}<div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>{% endif %}
+            <small class="text-muted">Shop lưu tin nhắn và phản hồi trong giờ làm việc.</small>
+          </div>
+          <div class="modal-footer"><button class="btn btn-dark fw-bold px-4" type="submit">Gửi</button></div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+    {% if recaptcha_site_key %}<script src="https://www.google.com/recaptcha/api.js" async defer></script>{% endif %}
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Tim kiem goi y live
+    (function () {
+        var inp = document.getElementById('live-search'), box = document.getElementById('search-suggest'), t = null;
+        if (!inp || !box) return;
+        function fmt(n){ try { return n.toLocaleString('vi-VN'); } catch(e){ return n; } }
+        inp.addEventListener('input', function () {
+            clearTimeout(t);
+            var q = inp.value.trim();
+            if (q.length < 2) { box.classList.add('d-none'); box.innerHTML=''; return; }
+            t = setTimeout(function () {
+                fetch('/search-suggest?q=' + encodeURIComponent(q)).then(function(r){ return r.json(); }).then(function(items){
+                    if (!items.length) { box.classList.add('d-none'); box.innerHTML=''; return; }
+                    box.innerHTML = items.map(function(it){
+                        return '<a href="'+it.url+'" class="list-group-item list-group-item-action d-flex gap-2 align-items-center">'
+                          + '<img src="'+it.image+'" style="width:40px;height:40px;object-fit:cover;" class="rounded border">'
+                          + '<span><b>'+it.name.replace(/</g,'&lt;')+'</b><br><small class="text-danger fw-bold">'+fmt(it.price)+' đ</small></span></a>';
+                    }).join('');
+                    box.classList.remove('d-none');
+                }).catch(function(){});
+            }, 250);
+        });
+        document.addEventListener('click', function(e){ if (!box.contains(e.target) && e.target !== inp) box.classList.add('d-none'); });
+    })();
+    </script>
+    <script>
+    // Ảnh rớt mạng → khung xám thay vì icon vỡ (áp dụng toàn site)
+    (function () {
+        var PH = "data:image/svg+xml," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400'><rect width='100%' height='100%' fill='#e9ecef'/><text x='50%' y='52%' font-size='28' text-anchor='middle' fill='#adb5bd'>FashionShop</text></svg>");
+        function arm(img) {
+            if (img.dataset.fbk) return;
+            img.dataset.fbk = "1";
+            img.addEventListener("error", function () {
+                img.classList.add("img-broken");
+                if (img.src !== PH) img.src = PH;
+            });
+        }
+        document.querySelectorAll("img").forEach(arm);
+        new MutationObserver(function (muts) {
+            muts.forEach(function (m) {
+                m.addedNodes.forEach(function (n) {
+                    if (n.tagName === "IMG") arm(n);
+                    else if (n.querySelectorAll) n.querySelectorAll("img").forEach(arm);
+                });
+            });
+        }).observe(document.body, { childList: true, subtree: true });
+        // Nút về đầu trang + navbar đổ bóng khi cuộn + hiện dần card
+        var btn = document.createElement("button");
+        btn.id = "backTop";
+        btn.title = "Về đầu trang";
+        btn.innerHTML = "↑";
+        btn.onclick = function () { window.scrollTo({ top: 0, behavior: "smooth" }); };
+        document.body.appendChild(btn);
+        var nav = document.querySelector("nav.navbar");
+        window.addEventListener("scroll", function () {
+            btn.style.display = window.scrollY > 400 ? "block" : "none";
+            if (nav) nav.classList.toggle("scrolled", window.scrollY > 10);
+        }, { passive: true });
+        // Hiện dần card khi cuộn tới
+        if ("IntersectionObserver" in window) {
+            var io = new IntersectionObserver(function (entries) {
+                entries.forEach(function (e) {
+                    if (e.isIntersecting) { e.target.classList.add("revealed"); io.unobserve(e.target); }
+                });
+            }, { threshold: 0.08 });
+            document.querySelectorAll(".product-card, .stat-card").forEach(function (el) {
+                el.classList.add("reveal");
+                io.observe(el);
+            });
+        }
+    })();
+    </script>
 </body>
 </html>

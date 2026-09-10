@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <h3 class="fw-bold text-uppercase mb-1">Báo cáo chi nhánh / kênh</h3>
+  <form method="GET" class="bg-white rounded-4 shadow-sm p-3 mb-3 d-flex gap-2 align-items-end">
+    <div><label class="form-label small fw-bold">Tháng</label><input name="month_num" class="form-control" value="{{ month }}" maxlength="2"></div>
+    <div><label class="form-label small fw-bold">Năm</label><input name="year_num" class="form-control" value="{{ year }}" maxlength="4"></div>
+    <button class="btn btn-dark fw-bold" type="submit">Lọc</button>
+  </form>
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="bg-white rounded-4 shadow-sm p-4 h-100">
+        <h6 class="fw-bold">Theo kênh Online / Tại quầy ({{ month }}/{{ year }}, đơn Hoàn thành)</h6>
+        <table class="table table-sm mb-0"><thead><tr><th>Kênh</th><th class="text-center">Đơn</th><th class="text-end">Doanh thu</th></tr></thead>
+        <tbody>{% for r in by_channel %}<tr><td>{{ 'Tại quầy' if r.ch=='tai_quay' else 'Online' }}</td><td class="text-center">{{ r.orders }}</td><td class="text-end">{{ '{:,.0f}'.format(r.rev or 0) }}đ</td></tr>{% else %}<tr><td colspan="3" class="text-muted text-center">Chưa có.</td></tr>{% endfor %}</tbody></table>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="bg-white rounded-4 shadow-sm p-4 h-100">
+        <h6 class="fw-bold">Theo chi nhánh</h6>
+        <table class="table table-sm mb-0"><thead><tr><th>Chi nhánh</th><th class="text-center">Đơn</th><th class="text-end">Doanh thu</th></tr></thead>
+        <tbody>{% for r in by_store %}<tr><td>{{ r.store }}</td><td class="text-center">{{ r.orders }}</td><td class="text-end">{{ '{:,.0f}'.format(r.rev or 0) }}đ</td></tr>{% else %}<tr><td colspan="3" class="text-muted text-center">Chưa có.</td></tr>{% endfor %}</tbody></table>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="bg-white rounded-4 shadow-sm p-4">
+        <h6 class="fw-bold">Tồn theo tiền: {{ '{:,.0f}'.format(stock_val.v or 0) }}đ ({{ stock_val.q or 0 }} cái)</h6>
+        <table class="table table-sm mb-0"><thead><tr><th>Danh mục</th><th class="text-center">SL tồn</th><th class="text-end">Giá trị tồn</th></tr></thead>
+        <tbody>{% for r in stock_by_cat %}<tr><td>{{ r.category }}</td><td class="text-center">{{ r.q }}</td><td class="text-end">{{ '{:,.0f}'.format(r.v or 0) }}đ</td></tr>{% endfor %}</tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

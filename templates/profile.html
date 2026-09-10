@@ -5,8 +5,8 @@
         <div class="col-lg-8">
             
             <div class="mb-4">
-                <h3 class="fw-bold text-dark">Hồ Sơ Cá Nhân</h3>
-                <p class="text-muted small">Quản lý thông tin tài khoản và bảo mật cá nhân</p>
+                <h3 class="fw-bold text-dark text-uppercase">Hồ sơ cá nhân</h3>
+                <p class="text-muted small">Quản lý tài khoản - Tích điểm - Nhận đơn tại quầy qua SĐT</p>
             </div>
 
             <div class="row g-4">
@@ -28,13 +28,18 @@
                                 <label class="form-label fw-semibold text-secondary small">Họ và tên</label>
                                 <input type="text" name="name" class="form-control bg-light border-0 py-2" value="{{ user.name }}" required>
                             </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-secondary small">Số điện thoại{% if current_user.role == 'Khách hàng' %} (để shop tích điểm + nhận đơn tại quầy){% endif %}</label>
+                                <input type="text" name="phone" class="form-control bg-light border-0 py-2" value="{{ user.phone or '' }}" placeholder="VD: 0912345678">
+                            </div>
                             
                             <div class="mb-3">
                                 <label class="form-label fw-semibold text-secondary small">Vai trò hệ thống</label>
                                 <input type="text" class="form-control bg-light border-0 py-2" value="{{ user.role }}" disabled>
                             </div>
                             
-                            <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm py-2 mt-2">Lưu thông tin</button>
+                            <button type="submit" class="btn btn-dark w-100 rounded-pill fw-bold shadow-sm py-2 mt-2">Lưu thông tin</button>
                         </form>
                     </div>
                 </div>
@@ -62,11 +67,41 @@
                                 <input type="password" name="confirm_password" class="form-control bg-light border-0 py-2" placeholder="Nhập lại mật khẩu mới" required>
                             </div>
                             
-                            <button type="submit" class="btn btn-outline-primary w-100 rounded-pill fw-bold shadow-sm py-2 mt-2">Đổi mật khẩu</button>
+                            <button type="submit" class="btn btn-outline-dark w-100 rounded-pill fw-bold shadow-sm py-2 mt-2">Đổi mật khẩu</button>
                         </form>
                     </div>
                 </div>
             </div>
+
+            <!-- Điểm thưởng (chỉ khách hàng, admin/NV chỉ quản lý) -->
+            {% if current_user.role == 'Khách hàng' %}
+            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-dark mb-0">⭐ Điểm thưởng của bạn</h5>
+                    <span class="badge bg-warning text-dark fs-6">{{ user.points or 0 }} điểm = {{ '{:,.0f}'.format((user.points or 0) * 1000) }}đ</span>
+                </div>
+                <p class="text-muted small">Mua đơn hoàn thành tích 1 điểm / 100.000đ. Dùng điểm trừ 1.000đ/điểm ở giỏ hàng.</p>
+                {% if point_history %}
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>Thời gian</th><th>Đơn</th><th>Loại</th><th class="text-end">Điểm</th></tr></thead>
+                        <tbody>
+                            {% for p in point_history %}
+                            <tr>
+                                <td class="small text-muted">{{ p.created_at }}</td>
+                                <td class="small">{% if p.order_id %}#ORD-{{ p.order_id }}{% else %}—{% endif %}</td>
+                                <td class="small">{% if p.type == 'EARN' %}Tích{% elif p.type == 'SPEND' %}Dùng{% elif p.type == 'REFUND' %}Hoàn{% else %}Thu hồi{% endif %}</td>
+                                <td class="text-end fw-bold {% if p.type in ['SPEND','REVOKE'] %}text-danger{% else %}text-success{% endif %}">{% if p.type in ['SPEND','REVOKE'] %}-{% else %}+{% endif %}{{ p.points }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted small mb-0">Chưa có lịch sử điểm.</p>
+                {% endif %}
+            </div>
+            {% endif %}
 
         </div>
     </div>

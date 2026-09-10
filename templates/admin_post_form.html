@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <div class="row justify-content-center"><div class="col-lg-8">
+    <div class="bg-white rounded-4 shadow-sm p-4">
+      <h4 class="fw-bold mb-3">{{ action }}</h4>
+      <form method="POST">
+        <div class="mb-2"><label class="form-label small fw-bold">Tiêu đề *</label><input name="title" class="form-control" required value="{{ p.get('title','') }}"></div>
+        <div class="row g-2">
+          <div class="col-md-6"><label class="form-label small fw-bold">Ảnh (URL)</label><input name="image" class="form-control" value="{{ p.get('image','') }}"></div>
+          <div class="col-md-6"><label class="form-label small fw-bold">Collection</label>
+            <select name="collection_id" class="form-select"><option value="">-- Không --</option>
+            {% for c in colls %}<option value="{{ c.id }}" {% if p.get('collection_id')==c.id %}selected{% endif %}>{{ c.title }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="mt-2"><label class="form-label small fw-bold">Nội dung *</label><textarea name="content" class="form-control" rows="8" required>{{ p.get('content','') }}</textarea></div>
+        <div class="form-check mt-2"><input type="checkbox" name="is_active" class="form-check-input" {% if p.get('is_active',1) %}checked{% endif %}><label class="form-check-label small fw-bold">Hiển thị</label></div>
+        <div class="mt-3"><label class="form-label small fw-bold">SP liên quan trong bài</label>
+          <div class="border rounded p-2" style="max-height:260px;overflow:auto;">
+            {% for pr in prods %}
+            <div class="form-check"><input type="checkbox" name="product_ids" value="{{ pr.id }}" class="form-check-input" {% if pr.id|string in picked %}checked{% endif %}><label class="form-check-label small">#{{ pr.id }} {{ pr.name }}</label></div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="d-flex gap-2 justify-content-end mt-3"><a href="{{ url_for('admin_posts') }}" class="btn btn-light rounded-pill px-4 fw-bold">Hủy</a><button class="btn btn-dark rounded-pill px-4 fw-bold" type="submit">Lưu</button></div>
+      </form>
+    </div>
+  </div></div>
+</div>
+{% endblock %}

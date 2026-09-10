@@ -20,17 +20,17 @@
 <div class="container-xl mt-4 mb-5">
     
     <!-- Tiêu đề và Thanh lọc theo ngày -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
         <div>
-            <h3 class="fw-bold text-dark mb-0">Đơn hàng của tôi</h3>
-            <p class="text-muted small mb-0">Theo dõi lịch sử mua hàng và trạng thái đơn hàng của bạn</p>
+            <h3 class="fw-bold text-dark mb-0 text-uppercase">Đơn hàng của tôi</h3>
+            <p class="text-muted small mb-0">Theo dõi lịch sử mua hàng - Đổi 14 ngày còn tem - GHN 24h/3-4 ngày</p>
         </div>
         
         <!-- Form lọc theo ngày -->
         <form method="GET" action="{{ url_for('my_orders') }}" class="d-flex gap-2 align-items-center bg-white p-2 rounded shadow-sm">
             <label class="fw-bold small text-secondary mb-0">Chọn ngày:</label>
             <input type="date" name="date" class="form-control form-control-sm border-secondary" value="{{ selected_date }}">
-            <button type="submit" class="btn btn-primary btn-sm px-3 fw-bold">Lọc</button>
+            <button type="submit" class="btn btn-dark btn-sm px-3 fw-bold text-uppercase">Lọc</button>
             {% if selected_date %}
             <a href="{{ url_for('my_orders') }}" class="btn btn-outline-danger btn-sm">✖</a>
             {% endif %}
@@ -48,9 +48,12 @@
                 </div>
                 
                 <div class="d-flex gap-2">
+                    {% if order.status != 'Đã hủy' %}
+                        <a href="{{ url_for('order_bill', order_id=order.id) }}" target="_blank" class="btn btn-sm btn-outline-secondary fw-bold rounded-pill px-3 shadow-sm">🖨️ Hóa đơn</a>
+                    {% endif %}
                     <!-- Nút mở QR thanh toán -->
                     {% if order.payment_method == 'Chuyển khoản' and order.status == 'Chờ thanh toán' %}
-                        <a href="{{ url_for('payment_info', order_id=order.id) }}" class="btn btn-sm btn-primary fw-bold rounded-pill px-3 shadow-sm">Mở mã QR</a>
+                        <a href="{{ url_for('payment_info', order_id=order.id) }}" class="btn btn-sm btn-dark fw-bold rounded-pill px-3 shadow-sm">Mở mã QR</a>
                     {% endif %}
                     
                     <!-- NÚT KHÁCH HÀNG TỰ HỦY ĐƠN -->
@@ -106,15 +109,15 @@
                     <div class="d-flex align-items-center gap-3">
                         <img src="{{ item.image }}" class="rounded-3 border" style="width: 60px; height: 60px; object-fit: cover;">
                         <div>
-                            <h6 class="fw-bold text-dark mb-0">{{ item.name }}</h6>
-                            <small class="text-muted">Số lượng: x{{ item.quantity }}</small>
+                            <h6 class="fw-bold text-dark mb-0">{{ item.name }}{% if item.is_gift %} <span class="badge bg-warning text-dark">quà 0đ</span>{% endif %}</h6>
+                            <small class="text-muted">Số lượng: x{{ item.quantity }}{% if item.variant_size %} — Size {{ item.variant_size }}/{{ item.variant_color }}{% else %} — bản thường{% endif %}</small>
                         </div>
                     </div>
                     
                     <div class="d-flex align-items-center gap-3">
                         <span class="fw-bold text-dark">{{ '{:,.0f}'.format(item.unit_price * item.quantity) }} đ</span>
                         
-                        <!-- NÚT ĐÁNH GIÁ VỚI LOGIC CHỐNG SPAM -->
+                        <!-- NÚT ĐÁNH GIÁ VỚI LOGIC CHỐNG SPAM + ĐỔI SIZE -->
                         {% if order.status == 'Hoàn thành' and not current_user.is_admin and current_user.role != 'Nhân viên' %}
                             {% if item.has_reviewed %}
                                 <button class="btn btn-secondary btn-sm rounded-pill px-3 fw-semibold shadow-sm" disabled>
@@ -125,12 +128,25 @@
                                     ⭐ Đánh giá
                                 </a>
                             {% endif %}
+                            {% if item.exchange_blocked %}
+                                <span class="small text-muted" title="Sale/Phụ kiện không đổi">Không đổi (Sale/PK)</span>
+                            {% elif item.exchange_pending %}
+                                <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold shadow-sm" disabled>🔄 Chờ duyệt đổi size</button>
+                            {% else %}
+                                <a href="{{ url_for('exchange_request', line_id=item.line_id) }}" class="btn btn-outline-info btn-sm rounded-pill px-3 fw-semibold shadow-sm">🔄 Đổi size</a>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
                 {% endfor %}
             </div>
 
+            {% if order.gift_name %}
+            <div class="text-end small text-muted">🎁 Quà: <b>{{ order.gift_name }}</b></div>
+            {% endif %}
+            {% if order.combos %}
+            <div class="text-end small text-muted">{% for cb in order.combos %}⚡ {{ cb.name }} x{{ cb.qty }}{% if cb.discount %} (-{{ '{:,.0f}'.format(cb.discount) }}đ){% endif %}{% if not loop.last %} | {% endif %}{% endfor %}</div>
+            {% endif %}
             <div class="text-end pt-2">
                 <span class="text-muted small">Tổng thanh toán: </span>
                 <span class="fw-bold text-success fs-5">{{ '{:,.0f}'.format(order.total_amount) }} đ</span>
@@ -161,7 +177,7 @@
     {% else %}
     <div class="card border-0 shadow-sm text-center py-5 bg-white rounded-4">
         <h5 class="text-muted mb-3">Bạn chưa có đơn hàng nào!</h5>
-        <a href="{{ url_for('index') }}" class="btn btn-primary rounded-pill px-4 fw-bold">Mua sắm ngay</a>
+        <a href="{{ url_for('index') }}" class="btn btn-dark rounded-pill px-4 fw-bold">Mua sắm ngay</a>
     </div>
     {% endif %}
 </div>

@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold text-uppercase mb-0">Tuyển dụng</h3>
+    <div class="d-flex gap-2"><a href="{{ url_for('admin_applications') }}" class="btn btn-outline-dark rounded-pill px-3 fw-bold">Hồ sơ</a><a href="{{ url_for('admin_job_add') }}" class="btn btn-dark rounded-pill px-4 fw-bold">+ Thêm tin</a></div>
+  </div>
+  <div class="card border-0 shadow-sm bg-white" style="border-radius:14px;overflow:hidden;">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-light"><tr><th class="ps-4">Vị trí</th><th>Địa điểm / Lương</th><th class="text-center">Hồ sơ</th><th class="text-center">Hiện</th><th class="text-end pe-4">Thao tác</th></tr></thead>
+      <tbody>
+        {% for j in rows %}
+        <tr><td class="ps-4 fw-bold">{{ j.title }}</td><td class="small">{{ j.location or '' }} / {{ j.salary or '' }}</td>
+        <td class="text-center">{{ j.apps }}</td><td class="text-center">{% if j.is_active %}<span class="badge bg-success">Hiện</span>{% else %}<span class="badge bg-secondary">Ẩn</span>{% endif %}</td>
+        <td class="text-end pe-4"><a href="{{ url_for('admin_job_edit', jid=j.id) }}" class="btn btn-outline-dark btn-sm rounded-pill">Sửa</a>
+        <form action="{{ url_for('admin_job_delete', jid=j.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Xóa tin?');"><button class="btn btn-outline-danger btn-sm rounded-pill" type="submit">Xóa</button></form></td></tr>
+        {% else %}<tr><td colspan="5" class="text-center text-muted py-4">Chưa có.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

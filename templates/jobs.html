@@ -1,0 +1,46 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <h3 class="fw-bold text-uppercase mb-1">Tuyển dụng</h3>
+  <p class="text-muted small mb-4">Xem vị trí đang tuyển và gửi hồ sơ online, shop lưu DB và phản hồi.</p>
+  <div class="row g-4">
+    <div class="col-lg-7">
+      {% for j in jobs %}
+      <div class="bg-white rounded-4 shadow-sm p-4 mb-3">
+        <h5 class="fw-bold mb-1">{{ j.title }}</h5>
+        <div class="small text-muted mb-2">{{ j.location or '' }}{% if j.salary %} • {{ j.salary }}{% endif %} • {{ j.created_at }}</div>
+        <div class="small" style="white-space:pre-line;">{{ j.description }}</div>
+      </div>
+      {% else %}
+      <div class="text-muted py-4">Hiện chưa có vị trí tuyển.</div>
+      {% endfor %}
+    </div>
+    <div class="col-lg-5">
+      <div class="bg-white rounded-4 shadow-sm p-4 sticky-top" style="top:100px;">
+        {% if current_user.is_authenticated and (current_user.is_admin == 1 or current_user.role == 'Nhân viên') %}
+        <h5 class="fw-bold mb-2">Form ứng tuyển</h5>
+        <div class="alert alert-info small mb-0">Tài khoản bán hàng không cần ứng tuyển. Duyệt hồ sơ ở <a href="{{ url_for('admin_applications') }}">Hồ sơ ứng tuyển</a>.</div>
+        {% else %}
+        <h5 class="fw-bold mb-3">Form ứng tuyển</h5>
+        <form method="POST">
+          <div class="mb-2"><label class="form-label small fw-bold">Vị trí *</label>
+            <select name="job_id" class="form-select" required>
+              <option value="">-- Chọn --</option>
+              {% for j in jobs %}<option value="{{ j.id }}">{{ j.title }} ({{ j.location or '' }})</option>{% endfor %}
+            </select>
+          </div>
+          <div class="mb-2"><label class="form-label small fw-bold">Họ tên *</label><input name="name" class="form-control" required maxlength="100"></div>
+          <div class="row g-2">
+            <div class="col-6"><label class="form-label small fw-bold">SĐT *</label><input name="phone" class="form-control" required maxlength="20"></div>
+            <div class="col-6"><label class="form-label small fw-bold">Email</label><input name="email" type="email" class="form-control" maxlength="255"></div>
+          </div>
+          <div class="mt-2 mb-3"><label class="form-label small fw-bold">Giới thiệu / kinh nghiệm *</label><textarea name="cv_text" class="form-control" rows="4" required maxlength="5000" placeholder="Tuổi, khu vực, ca làm được, kinh nghiệm..."></textarea></div>
+          {% if recaptcha_site_key %}<div class="mb-3"><div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div></div>{% endif %}
+          <button class="btn btn-dark w-100 fw-bold" type="submit">Gửi hồ sơ</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

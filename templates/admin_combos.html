@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold text-uppercase mb-0">Combo khuyến mãi hẹn giờ</h3>
+    <a href="{{ url_for('admin_combo_add') }}" class="btn btn-dark rounded-pill px-4 fw-bold">+ Thêm combo</a>
+  </div>
+  <p class="small text-muted">Tự động áp khi đặt hàng, không cần nhập tay. Hẹn giờ bắt đầu/kết thúc.</p>
+  <div class="card border-0 shadow-sm bg-white" style="border-radius:14px;overflow:hidden;">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-light"><tr><th class="ps-4">Tên</th><th>Loại / Điều kiện</th><th>Hẹn giờ</th><th class="text-center">Chạy?</th><th class="text-end pe-4">Thao tác</th></tr></thead>
+      <tbody>
+        {% for c in rows %}
+        <tr><td class="ps-4 fw-bold">{{ c.name }}</td>
+        <td class="small">{% if c.combo_type=='BUY_GET' %}Mua SP#{{ c.trigger_product_id }} x{{ c.trigger_qty }} tặng SP#{{ c.gift_product_id }} x{{ c.gift_qty }}{% else %}Set [{{ c.bundle_product_ids }}] giá {{ '{:,.0f}'.format(c.bundle_price or 0) }}đ{% endif %}</td>
+        <td class="small text-muted">{{ c.start_at or '...' }} → {{ c.end_at or '...' }}</td>
+        <td class="text-center">{% if c.running %}<span class="badge bg-success">Đang chạy</span>{% else %}<span class="badge bg-secondary">Tắt/Hết hạn</span>{% endif %}</td>
+        <td class="text-end pe-4"><a href="{{ url_for('admin_combo_edit', cid=c.id) }}" class="btn btn-outline-dark btn-sm rounded-pill">Sửa</a>
+        <form action="{{ url_for('admin_combo_delete', cid=c.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Xóa/tắt combo?');"><button class="btn btn-outline-danger btn-sm rounded-pill" type="submit">Xóa</button></form></td></tr>
+        {% else %}<tr><td colspan="5" class="text-center text-muted py-4">Chưa có combo.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

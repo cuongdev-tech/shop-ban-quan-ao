@@ -1,0 +1,45 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-2 px-4">
+          <h4 class="fw-bold text-dark mb-0 text-uppercase">Đổi size 14 ngày</h4>
+          <p class="text-muted small">Chỉ đổi trong cùng sản phẩm ngang giá - Còn tem + hóa đơn - COD chịu ship 2 chiều. Hàng Sale và Phụ kiện tuyệt đối không đổi.</p>
+        </div>
+        <div class="card-body p-4">
+          <div class="bg-light rounded-3 p-3 mb-4 small">
+            <div><span class="text-muted">Đơn:</span> <b>#ORD-{{ line.order_id }}</b></div>
+            <div><span class="text-muted">Món:</span> <b>{{ product.name }}</b> x{{ line.quantity }}</div>
+            <div><span class="text-muted">Đang là:</span> <b>Size {{ line.variant_size }}/{{ line.variant_color }}</b></div>
+          </div>
+          {% if options %}
+          <form method="POST">
+            <div class="mb-3">
+              <label class="form-label fw-semibold text-secondary small">Đổi sang *</label>
+              <select name="new_variant_id" class="form-select bg-light border-0 py-2" required>
+                {% for v in options %}
+                <option value="{{ v.id }}">{{ v.size }} / {{ v.color }} (còn {{ v.stock }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-semibold text-secondary small">Lý do (không bắt buộc)</label>
+              <input type="text" name="reason" class="form-control bg-light border-0 py-2" maxlength="255" placeholder="VD: chật, muốn rộng hơn...">
+            </div>
+            <div class="d-flex gap-2 justify-content-end">
+              <a href="{{ url_for('my_orders') }}" class="btn btn-light fw-bold px-4 rounded-pill">Hủy</a>
+              <button type="submit" class="btn btn-dark fw-bold px-4 rounded-pill shadow-sm text-uppercase">Gửi yêu cầu</button>
+            </div>
+          </form>
+          {% else %}
+          <div class="alert alert-warning small mb-0">Hiện không còn phân loại nào khác còn hàng để đổi. Vui lòng thử lại sau!</div>
+          <div class="mt-3"><a href="{{ url_for('my_orders') }}" class="btn btn-light fw-bold px-4 rounded-pill">Quay lại</a></div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

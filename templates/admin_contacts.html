@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <h3 class="fw-bold text-uppercase mb-3">Tin nhắn liên hệ</h3>
+  <div class="mb-3 d-flex gap-2">
+    <a href="{{ url_for('admin_contacts') }}" class="btn btn-sm rounded-pill {% if not status %}btn-dark{% else %}btn-outline-secondary{% endif %} fw-bold">Tất cả</a>
+    {% for s in ['Moi','Da_tra_loi','Dong'] %}
+    <a href="{{ url_for('admin_contacts', status=s) }}" class="btn btn-sm rounded-pill {% if status==s %}btn-dark{% else %}btn-outline-secondary{% endif %} fw-bold">{{ s }} ({{ counts[s] }})</a>
+    {% endfor %}
+  </div>
+  {% for r in rows %}
+  <div class="bg-white rounded-4 shadow-sm p-4 mb-3">
+    <div class="d-flex justify-content-between"><b>{{ r.name }} — {{ r.phone }}</b><small class="text-muted">{{ r.created_at }} | {{ r.status }}</small></div>
+    <div class="mt-2">{{ r.message }}</div>
+    {% if r.reply %}<div class="mt-2 p-2 bg-light rounded small"><b>Shop trả lời:</b> {{ r.reply }}</div>{% endif %}
+    <form action="{{ url_for('admin_contact_reply', cid=r.id) }}" method="POST" class="d-flex gap-2 mt-3">
+      <input name="reply" class="form-control" required maxlength="2000" placeholder="Nhập trả lời..." value="{{ r.reply or '' }}">
+      <button class="btn btn-dark btn-sm fw-bold px-3" type="submit">Trả lời</button>
+    </form>
+    {% if r.status != 'Dong' %}
+    <form action="{{ url_for('admin_contact_close', cid=r.id) }}" method="POST" class="d-inline mt-2"><button class="btn btn-outline-secondary btn-sm" type="submit">Đóng</button></form>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="text-center text-muted py-5">Không có tin nhắn.</div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -9,6 +9,8 @@ env/
 *.db
 *.sqlite3
 config.py
+backup_*.sql
+_tmp_*.py
 
 # Hệ điều hành
 .DS_Store

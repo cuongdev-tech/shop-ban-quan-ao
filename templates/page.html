@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <div class="row g-4">
+    <div class="col-lg-3">
+      <div class="bg-white rounded-4 shadow-sm p-3">
+        <h6 class="fw-bold text-uppercase small mb-3">Hỗ trợ - Chính sách</h6>
+        {% for slug, title in static_pages %}
+        <a href="{{ url_for('static_page', slug=slug) }}" class="d-block text-decoration-none py-2 border-bottom small {% if page.slug == slug %}fw-bold text-dark{% else %}text-muted{% endif %}">{{ title }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-lg-9">
+      <div class="bg-white rounded-4 shadow-sm p-4">
+        <h3 class="fw-bold text-uppercase mb-1">{{ page.title }}</h3>
+        <small class="text-muted">Cập nhật: {{ page.updated_at }}</small>
+        <hr>
+        <div style="white-space:pre-line; line-height:1.7;">{{ page.content }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

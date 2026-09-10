@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <div class="row justify-content-center"><div class="col-lg-6">
+    <div class="bg-white rounded-4 shadow-sm p-4">
+      <h4 class="fw-bold mb-3">{{ action }}</h4>
+      <form method="POST">
+        <div class="mb-2"><label class="form-label small fw-bold">Tên quà *</label><input name="name" class="form-control" required value="{{ g.get('name','') }}"></div>
+        <div class="row g-2">
+          <div class="col-6"><label class="form-label small fw-bold">Kho</label><input name="stock" type="number" min="0" class="form-control" value="{{ g.get('stock',100) }}"></div>
+          <div class="col-6"><label class="form-label small fw-bold">Đơn từ (đ)</label><input name="min_order_amount" type="number" min="0" step="1000" class="form-control" value="{{ g.get('min_order_amount',500000) }}"></div>
+        </div>
+        <div class="mt-2"><label class="form-label small fw-bold">Ảnh (URL, tùy chọn)</label><input name="image" class="form-control" value="{{ g.get('image','') }}"></div>
+        <div class="form-check mt-3"><input type="checkbox" name="is_active" class="form-check-input" {% if g.get('is_active',1) %}checked{% endif %}><label class="form-check-label small fw-bold">Hiển thị</label></div>
+        <div class="d-flex gap-2 justify-content-end mt-3"><a href="{{ url_for('admin_gifts') }}" class="btn btn-light rounded-pill px-4 fw-bold">Hủy</a><button class="btn btn-dark rounded-pill px-4 fw-bold" type="submit">Lưu</button></div>
+      </form>
+    </div>
+  </div></div>
+</div>
+{% endblock %}

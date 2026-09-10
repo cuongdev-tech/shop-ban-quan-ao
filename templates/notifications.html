@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold text-uppercase mb-0">Thông báo</h3>
+    <form action="{{ url_for('notifications_read_all') }}" method="POST"><button class="btn btn-outline-dark btn-sm rounded-pill fw-bold" type="submit">Đánh dấu đã đọc hết</button></form>
+  </div>
+  {% for n in rows %}
+  <div class="bg-white rounded-4 shadow-sm p-3 mb-2 d-flex justify-content-between align-items-center {% if not n.is_read %}border border-primary{% endif %}">
+    <div><div class="{% if not n.is_read %}fw-bold{% endif %}">{{ n.title }}</div><small class="text-muted">{{ n.created_at }}</small>
+    {% if n.link %} <a href="{{ n.link }}" class="small">Xem</a>{% endif %}</div>
+    {% if not n.is_read %}
+    <form action="{{ url_for('notification_read', nid=n.id) }}" method="POST"><button class="btn btn-sm btn-light rounded-pill" type="submit">Đã đọc</button></form>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="text-center text-muted py-5">Chưa có thông báo.</div>
+  {% endfor %}
+</div>
+{% endblock %}

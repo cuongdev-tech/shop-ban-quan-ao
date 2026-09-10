@@ -10,20 +10,29 @@
 <div class="container-xl mt-4 mb-5">
     
     <!-- Tiêu đề & Nút thêm -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-3">
         <div>
-            <h4 class="fw-bold text-dark mb-1"> Quản lý Sản phẩm</h4>
-            <p class="text-muted small mb-0">Danh sách toàn bộ quần áo, phụ kiện đang bán tại cửa hàng</p>
+            <h4 class="fw-bold text-dark mb-1 text-uppercase"> Quản lý sản phẩm bigsize</h4>
+            <p class="text-muted small mb-0">Mã FS - Biến thể M-5XL - Sale - Kiểm hàng/Đổi 14 ngày</p>
         </div>
         <div>
+            <form action="{{ url_for('admin_resync_stock', tab=tab) }}" method="POST" class="d-inline" onsubmit="return confirm('Đồng bộ tổng kho = tổng tồn biến thể cho toàn bộ SP?');">
+                <button type="submit" class="btn btn-outline-secondary btn-sm fw-bold px-3 shadow-sm" style="border-radius: 8px;">Đồng bộ kho</button>
+            </form>
             <a href="{{ url_for('admin_add_product') }}" class="btn btn-dark btn-sm fw-bold px-3 shadow-sm" style="border-radius: 8px;">+ Thêm sản phẩm mới</a>
         </div>
+    </div>
+
+    <div class="mb-3 d-flex gap-2">
+        <a href="{{ url_for('admin_products', tab='active') }}" class="btn btn-sm rounded-pill {% if tab == 'active' %}btn-dark{% else %}btn-outline-secondary{% endif %} fw-bold">Đang bán ({{ counts.active }})</a>
+        <a href="{{ url_for('admin_products', tab='hidden') }}" class="btn btn-sm rounded-pill {% if tab == 'hidden' %}btn-dark{% else %}btn-outline-secondary{% endif %} fw-bold">Đã ẩn ({{ counts.hidden }})</a>
+        <a href="{{ url_for('admin_products', tab='all') }}" class="btn btn-sm rounded-pill {% if tab == 'all' %}btn-dark{% else %}btn-outline-secondary{% endif %} fw-bold">Tất cả</a>
     </div>
 
     <!-- BẢNG QUẢN LÝ SẢN PHẨM -->
     <div class="card border-0 shadow-sm bg-white p-0" style="border-radius: 14px; overflow: hidden;">
         <div class="table-responsive">
-            <table class="table table-hover mb-0 align-middle">
+            <table class="table table-admin table-hover mb-0 align-middle">
                 <thead>
                     <tr>
                         <th class="ps-4" width="80">Ảnh</th>
@@ -59,7 +68,16 @@
                         </td>
                         <td class="text-center pe-4">
                             <a href="{{ url_for('admin_edit_product', product_id=p.id) }}" class="btn btn-outline-primary btn-sm px-3 rounded-pill fw-bold" style="font-size: 0.75rem;">Sửa</a>
-                            <a href="{{ url_for('admin_delete_product', product_id=p.id) }}" class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-bold" style="font-size: 0.75rem;" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">Xóa</a>
+                            {% if p.is_active == 0 %}
+                            <form action="{{ url_for('admin_restore_product', product_id=p.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Khôi phục sản phẩm này?');">
+                                <button type="submit" class="btn btn-outline-success btn-sm px-3 rounded-pill fw-bold" style="font-size: 0.75rem;">Khôi phục</button>
+                            </form>
+                            <span class="badge bg-secondary rounded-pill ms-1">Đang ẩn</span>
+                            {% else %}
+                            <form action="{{ url_for('admin_delete_product', product_id=p.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn ẩn sản phẩm này không?');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-bold" style="font-size: 0.75rem;">Ẩn</button>
+                            </form>
+                            {% endif %}
                         </td>
                     </tr>
                     {% else %}

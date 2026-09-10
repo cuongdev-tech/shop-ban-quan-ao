@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <h3 class="fw-bold text-uppercase mb-1">Cấu hình ship / quà</h3>
+  <p class="text-muted small mb-3">Subscribers: {{ counts.subs }} | Tin nhắn: {{ counts.contacts }} | Cửa hàng: {{ counts.stores }} | Quà: {{ counts.gifts }}</p>
+  <div class="row justify-content-center"><div class="col-lg-6">
+    <form method="POST" class="bg-white rounded-4 shadow-sm p-4">
+      <div class="mb-3"><label class="form-label small fw-bold">Freeship từ (đ) — chốt 500.000</label><input name="freeship_threshold" type="number" min="0" step="1000" class="form-control" value="{{ cur.freeship_threshold }}"></div>
+      <div class="mb-3"><label class="form-label small fw-bold">Đơn tối thiểu (đ) — chốt 0 (0đ vẫn đặt được)</label><input name="min_order_amount" type="number" min="0" step="1000" class="form-control" value="{{ cur.min_order_amount }}"></div>
+      <div class="mb-3"><label class="form-label small fw-bold">Quà từ (đ) — 1 đơn 1 quà</label><input name="gift_min_amount" type="number" min="0" step="1000" class="form-control" value="{{ cur.gift_min_amount }}"></div>
+      <div class="mb-3"><label class="form-label small fw-bold">Hoa hồng NV (%)</label><input name="commission_rate" type="number" min="0" max="50" step="0.5" class="form-control" value="{{ cur.commission_rate }}"></div>
+      <div class="mb-3"><label class="form-label small fw-bold">STK shop (mỗi dòng 1 STK, hiện ở trang chuyển khoản)</label><textarea name="shop_bank_accounts" class="form-control" rows="3">{{ cur.shop_bank_accounts }}</textarea></div>
+      <div class="mb-3"><label class="form-label small fw-bold">reCAPTCHA site key (trống = tắt)</label><input name="recaptcha_site_key" class="form-control" value="{{ cur.recaptcha_site_key }}"></div>
+      <div class="mb-3"><label class="form-label small fw-bold">reCAPTCHA secret key</label><input name="recaptcha_secret_key" class="form-control" value="{{ cur.recaptcha_secret_key }}"></div>
+      <div class="form-check mb-3"><input type="checkbox" name="require_email_verify" class="form-check-input" {% if cur.require_email_verify == '1' %}checked{% endif %}><label class="form-check-label small fw-bold">Bắt xác thực email khi đăng ký</label></div>
+      <button class="btn btn-dark w-100 fw-bold" type="submit">Lưu cấu hình</button>
+    </form>
+    <div class="d-flex gap-2 mt-3 flex-wrap">
+      <a href="{{ url_for('admin_gifts') }}" class="btn btn-outline-dark btn-sm fw-bold">Quà tặng</a>
+      <a href="{{ url_for('admin_subscribers') }}" class="btn btn-outline-dark btn-sm fw-bold">Nhận tin</a>
+      <a href="{{ url_for('admin_contacts') }}" class="btn btn-outline-dark btn-sm fw-bold">Tin nhắn</a>
+      <a href="{{ url_for('admin_stores') }}" class="btn btn-outline-dark btn-sm fw-bold">Cửa hàng</a>
+      <a href="{{ url_for('admin_pages') }}" class="btn btn-outline-dark btn-sm fw-bold">Trang nội dung</a>
+    </div>
+  </div></div>
+</div>
+{% endblock %}

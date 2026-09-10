@@ -1,19 +1,25 @@
 {% extends 'layout.html' %}
 {% block content %}
-<div class="container text-center mt-5">
-    <div class="card p-4 shadow-sm border-0" style="max-width: 400px; margin: auto;">
-        <h3>Thanh toán đơn #ORD-{{ order.id }}</h3>
-        <p class="text-muted">Quét mã QR dưới đây để chuyển khoản:</p>
-        
-        
-        <img src="https://api.vietqr.io/image/970415-123456789-default.jpg?amount={{ order.total_amount }}&addInfo=ORD{{ order.id }}" 
-             alt="QR Thanh toán" class="img-fluid my-3">
-        
-        <h4 class="text-danger">{{ '{:,.0f}'.format(order.total_amount) }} đ</h4>
-        
+<div class="container text-center mt-4 mb-5">
+    <div class="card p-4 shadow-sm border-0 rounded-4 bg-white" style="max-width: 420px; margin: auto;">
+        <div class="fs-1">📱</div>
+        <h4 class="fw-bold mt-2 text-uppercase">Thanh toán #ORD-{{ order.id }}</h4>
+        <p class="text-muted small">Quét QR chuyển khoản đúng số tiền - GHN giao 24h/3-4 ngày:</p>
+
+        <img src="https://api.vietqr.io/image/970415-123456789-default.jpg?amount={{ order.total_amount }}&addInfo=ORD{{ order.id }}"
+             alt="QR Thanh toán" class="img-fluid my-3 rounded-3 border">
+
+        <h4 class="fw-bold text-danger">{{ '{:,.0f}'.format(order.total_amount) }} đ</h4>
+        <div class="text-start small bg-light rounded p-2 mt-2">
+            <b>STK shop:</b><br>{{ bank_accounts|replace('\n','<br>')|safe if bank_accounts else 'Vietcombank 1234567890 - FashionShop - CN Da Nang' }}
+            <br><span class="text-muted">Nội dung: ORD{{ order.id }} — SĐT {{ order.phone }}. Sau khi chuyển bấm nút bên dưới để shop đối soát.</span>
+            <br><a href="{{ url_for('bank_guide') }}">Hướng dẫn chi tiết</a>
+        </div>
+
         <form action="{{ url_for('confirm_payment', order_id=order.id) }}" method="POST">
-            <button type="submit" class="btn btn-success w-100 mt-3 fw-bold">Thanh toán thành công</button>
+            <button type="submit" class="btn btn-dark w-100 mt-3 text-uppercase">Tôi đã chuyển khoản</button>
         </form>
+        <a href="{{ url_for('my_orders') }}" class="btn btn-light w-100 mt-2 rounded-pill">Để sau</a>
     </div>
 </div>
 {% endblock %}

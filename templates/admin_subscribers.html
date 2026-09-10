@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <h3 class="fw-bold text-uppercase mb-1">Nhận tin KM ({{ rows|length }})</h3>
+  <p class="text-muted small mb-3">Lưu DB thật từ form footer. Copy list để gửi mail KM/sale.</p>
+  <div class="card border-0 shadow-sm bg-white" style="border-radius:14px;overflow:hidden;">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-light"><tr><th class="ps-4">Email</th><th>Ngày ĐK</th><th class="text-end pe-4">Xóa</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr><td class="ps-4">{{ r.email }}</td><td class="small text-muted">{{ r.created_at }}</td>
+        <td class="text-end pe-4"><form action="{{ url_for('admin_subscriber_delete', sid=r.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Xóa email này?');"><button class="btn btn-outline-danger btn-sm rounded-pill" type="submit">Xóa</button></form></td></tr>
+        {% else %}<tr><td colspan="3" class="text-center text-muted py-4">Chưa có ai đăng ký.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

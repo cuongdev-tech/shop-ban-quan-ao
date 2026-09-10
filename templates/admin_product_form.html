@@ -23,8 +23,30 @@
                 {{ form.price(class_='form-control bg-light border-0 py-2') }}
               </div>
               <div class="col-md-6 mt-3 mt-md-0">
-                <label class="form-label fw-semibold text-secondary small">Số lượng kho</label>
+                <label class="form-label fw-semibold text-secondary small">Số lượng kho (chỉ dùng khi không nhập biến thể bên dưới)</label>
                 {{ form.stock(class_='form-control bg-light border-0 py-2') }}
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold text-secondary small">Biến thể Size / Màu (mỗi dòng: Size | Màu | SL — vd: M | Đen | 20)</label>
+              {{ form.variants(class_='form-control bg-light border-0 py-2', rows='4', placeholder='M | Đen | 20
+L | Trắng | 15') }}
+              <div class="form-text small text-muted">Size cho phép: {{ sizes|join(', ') }}. Màu cho phép: {{ colors|join(', ') }}. Bỏ trống = 1 biến thể mặc định lấy SL ở ô trên. Xóa dòng của biến thể đã bán sẽ được giữ lại (báo vàng).</div>
+            </div>
+
+            <div class="row mb-4">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold text-secondary small">Giá sale (để trống = không sale)</label>
+                {{ form.sale_price(class_='form-control bg-light border-0 py-2') }}
+              </div>
+              <div class="col-md-4 mt-3 mt-md-0">
+                <label class="form-label fw-semibold text-secondary small">Sale từ (YYYY-MM-DD)</label>
+                {{ form.sale_start(class_='form-control bg-light border-0 py-2', placeholder='2026-01-01') }}
+              </div>
+              <div class="col-md-4 mt-3 mt-md-0">
+                <label class="form-label fw-semibold text-secondary small">Sale đến (YYYY-MM-DD)</label>
+                {{ form.sale_end(class_='form-control bg-light border-0 py-2', placeholder='2026-12-31') }}
               </div>
             </div>
 
@@ -44,15 +66,55 @@
               {{ form.description(class_='form-control bg-light border-0 py-2', rows='4') }}
             </div>
 
-            <div class="form-check form-switch mb-4">
+            <div class="row mb-4">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold text-secondary small">Thương hiệu</label>
+                {{ form.brand(class_='form-control bg-light border-0 py-2', placeholder='FashionShop') }}
+              </div>
+              <div class="col-md-8 mt-3 mt-md-0">
+                <label class="form-label fw-semibold text-secondary small">Video mặc thử (URL mp4 hoặc youtube embed)</label>
+                {{ form.video_url(class_='form-control bg-light border-0 py-2', placeholder='https://...') }}
+              </div>
+            </div>
+
+            <div class="row mb-4">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold text-secondary small">Chất liệu</label>
+                {{ form.material(class_='form-control bg-light border-0 py-2', placeholder='VD: Cotton 95% + Spandex 5%') }}
+              </div>
+              <div class="col-md-4 mt-3 mt-md-0">
+                <label class="form-label fw-semibold text-secondary small">Form dáng</label>
+                {{ form.fit(class_='form-control bg-light border-0 py-2', placeholder='VD: Basic, Oversize, Slim-fit') }}
+              </div>
+              <div class="col-md-4 mt-3 mt-md-0">
+                <label class="form-label fw-semibold text-secondary small">Ghi chú size</label>
+                {{ form.size_note(class_='form-control bg-light border-0 py-2', placeholder='VD: Size S-XXL, form rộng lấy lùi 1 size') }}
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold text-secondary small">Gallery (mỗi dòng 1 URL ảnh, tối đa 10)</label>
+              {{ form.gallery(class_='form-control bg-light border-0 py-2', rows='3', placeholder='https://...\nhttps://...') }}
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold text-secondary small">FAQ riêng (mỗi dòng: Câu hỏi || Trả lời, tối đa 10)</label>
+              {{ form.faqs(class_='form-control bg-light border-0 py-2', rows='3', placeholder='Vải có co giãn không? || Co giãn 4 chiều nhẹ\n...') }}
+            </div>
+
+            <div class="form-check form-switch mb-2">
               {{ form.is_featured(class_='form-check-input fs-5', id='featuredSwitch') }}
               <label class="form-check-label fw-semibold ms-2 mt-1 text-dark" for="featuredSwitch">Đánh dấu là Sản phẩm Nổi bật (Hiển thị đầu trang)</label>
+            </div>
+            <div class="form-check form-switch mb-4">
+              {{ form.has_gift(class_='form-check-input fs-5', id='giftSwitch') }}
+              <label class="form-check-label fw-semibold ms-2 mt-1 text-dark" for="giftSwitch">SP có quà kèm (đủ điều kiện 1 đơn được chọn 1 quà)</label>
             </div>
 
             <hr class="text-muted opacity-25">
             <div class="d-flex gap-2 justify-content-end mt-4">
               <a href="{{ url_for('admin_products') }}" class="btn btn-light fw-bold px-4 rounded-pill">Hủy bỏ</a>
-              <button type="submit" class="btn btn-primary fw-bold px-5 rounded-pill shadow-sm">Lưu thông tin</button>
+              <button type="submit" class="btn btn-dark fw-bold px-5 rounded-pill shadow-sm text-uppercase">Lưu thông tin</button>
             </div>
           </form>
         </div>

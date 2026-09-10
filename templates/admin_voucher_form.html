@@ -1,0 +1,81 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-2 px-4">
+          <h4 class="fw-bold text-dark mb-0">{{ action }}</h4>
+          <p class="text-muted small">Mã in hoa, 3-20 ký tự chữ/số. Tiền giảm tính theo logic chống abuse ở checkout (tối đa tổng − 1000đ).</p>
+          {% if used is defined and used > 0 %}
+          <div class="alert alert-warning py-2 small mb-0">Mã này đã có <b>{{ used }}</b> đơn dùng: không được đổi mã/loại/mức giảm, chỉ sửa hạn/lượt/đơn tối thiểu/trần/freeship.</div>
+          {% endif %}
+        </div>
+        <div class="card-body p-4">
+          <form method="post">
+            <div class="mb-3">
+              <label class="form-label fw-semibold text-secondary small">Mã voucher *</label>
+              <input type="text" name="code" class="form-control bg-light border-0 py-2 text-uppercase" required
+                     maxlength="20" pattern="[A-Za-z0-9]{3,20}" title="3-20 ký tự chữ/số"
+                     value="{{ v.code if v and v.code is defined else '' }}"
+                     {% if locked %}readonly{% endif %} placeholder="VD: GIAM50K">
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold text-secondary small">Loại giảm *</label>
+                <select name="discount_type" class="form-select bg-light border-0 py-2" {% if locked %}disabled{% endif %}>
+                  <option value="FIXED" {% if v and v.discount_type == 'FIXED' %}selected{% endif %}>Tiền cố định (đ)</option>
+                  <option value="PERCENT" {% if v and v.discount_type == 'PERCENT' %}selected{% endif %}>Phần trăm (%)</option>
+                </select>
+                {% if locked %}<input type="hidden" name="discount_type" value="{{ v.discount_type }}">{% endif %}
+              </div>
+              <div class="col-md-4 mt-3 mt-md-0">
+                <label class="form-label fw-semibold text-secondary small">Mức giảm * (% hoặc đ)</label>
+                <input type="number" name="discount_amount" class="form-control bg-light border-0 py-2" required min="1" step="1"
+                       value="{{ v.discount_amount if v and v.discount_amount is defined else '' }}"
+                       {% if locked %}readonly{% endif %}>
+              </div>
+              <div class="col-md-4 mt-3 mt-md-0">
+                <label class="form-label fw-semibold text-secondary small">Trần giảm (đ, % mới cần)</label>
+                <input type="number" name="max_discount" class="form-control bg-light border-0 py-2" min="0" step="1000"
+                       value="{{ v.max_discount if v and v.max_discount is defined else 0 }}">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold text-secondary small">Đơn tối thiểu (đ)</label>
+                <input type="number" name="min_order_amount" class="form-control bg-light border-0 py-2" min="0" step="1000"
+                       value="{{ v.min_order_amount if v and v.min_order_amount is defined else 0 }}">
+              </div>
+              <div class="col-md-6 mt-3 mt-md-0 d-flex align-items-end pb-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="is_freeship" value="1" id="fsCheck"
+                         {% if v and v.is_freeship %}checked{% endif %}>
+                  <label class="form-check-label fw-semibold small" for="fsCheck">Miễn phí ship đơn này</label>
+                </div>
+              </div>
+            </div>
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold text-secondary small">Lượt dùng *</label>
+                <input type="number" name="usage_limit" class="form-control bg-light border-0 py-2" required min="0" step="1"
+                       value="{{ v.usage_limit if v and v.usage_limit is defined else 10 }}">
+              </div>
+              <div class="col-md-6 mt-3 mt-md-0">
+                <label class="form-label fw-semibold text-secondary small">Hạn sử dụng *</label>
+                <input type="date" name="expires_at" class="form-control bg-light border-0 py-2" required
+                       value="{{ v.expires_at if v and v.expires_at is defined else '' }}">
+              </div>
+            </div>
+            <hr class="text-muted opacity-25">
+            <div class="d-flex gap-2 justify-content-end mt-4">
+              <a href="{{ url_for('admin_vouchers') }}" class="btn btn-light fw-bold px-4 rounded-pill">Hủy bỏ</a>
+              <button type="submit" class="btn btn-dark fw-bold px-5 rounded-pill shadow-sm text-uppercase">Lưu</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

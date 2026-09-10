@@ -1,0 +1,35 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <h3 class="fw-bold text-uppercase mb-1">Đổi tại quầy (quét mã đơn)</h3>
+  <p class="text-muted small mb-3">NV nhập mã đơn (#ORD-id) hoặc SĐT → đổi ngay, không ship 2 chiều. Sale/Phụ kiện vẫn cấm.</p>
+  <form method="GET" class="bg-white rounded-4 shadow-sm p-3 mb-3 d-flex gap-2">
+    <input name="q" class="form-control" placeholder="Mã đơn (VD 12) hoặc SĐT..." value="{{ q }}">
+    <button class="btn btn-dark fw-bold px-4" type="submit">Tìm</button>
+  </form>
+  {% if msg %}<div class="alert alert-warning">{{ msg }}</div>{% endif %}
+  {% if order %}
+  <div class="bg-white rounded-4 shadow-sm p-4">
+    <h5 class="fw-bold">#ORD-{{ order.id }} — {{ order.fullname }} — {{ order.phone }} ({{ order.status }})</h5>
+    {% for ln in lines %}
+    <div class="border rounded p-3 mb-2">
+      <b>{{ ln.name }}</b> x{{ ln.quantity }} — đang là Size {{ ln.variant_size }}/{{ ln.variant_color }}
+      {% set opts = options_map.get(ln.line_id, []) %}
+      {% if opts %}
+      <form action="{{ url_for('admin_exchange_instore') }}?q={{ order.id }}" method="POST" class="d-flex gap-2 mt-2">
+        <input type="hidden" name="do_exchange" value="1">
+        <input type="hidden" name="line_id" value="{{ ln.line_id }}">
+        <select name="new_variant_id" class="form-select w-auto" required>
+          {% for v in opts %}<option value="{{ v.id }}">{{ v.size }}/{{ v.color }} (còn {{ v.stock }})</option>{% endfor %}
+        </select>
+        <button class="btn btn-dark btn-sm fw-bold px-3" type="submit" onclick="return confirm('Đổi ngay tại quầy?');">Đổi ngay</button>
+      </form>
+      {% else %}
+      <div class="small text-muted mt-1">Không còn phân loại đủ hàng để đổi.</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

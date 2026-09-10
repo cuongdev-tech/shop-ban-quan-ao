@@ -1,0 +1,96 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <h3 class="fw-bold text-uppercase mb-1">Mua ngay</h3>
+  <p class="text-muted small mb-4">Đi thẳng thanh toán, bỏ qua giỏ hàng.</p>
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="bg-white rounded-4 shadow-sm p-4 d-flex gap-3 align-items-center">
+        <img src="{{ prod.image }}" class="rounded border" style="width:90px;height:90px;object-fit:cover;">
+        <div class="flex-fill">
+          <h6 class="fw-bold mb-1">{{ prod.name }}</h6>
+          <div class="small text-muted">Size {{ variant.size }}/{{ variant.color }}</div>
+          <div class="fw-bold text-danger"><span id="bn-line">{{ '{:,.0f}'.format(unit_price) }} đ x {{ qty }} = {{ '{:,.0f}'.format(total_amount) }} đ</span></div>
+          {% if prod.has_gift %}<div class="small">🎁 SP có quà kèm (1 đơn 1 quà)</div>{% endif %}
+          <div class="d-inline-flex align-items-center border rounded-pill px-1 py-1 mt-2 bg-light">
+            <button type="button" class="btn btn-light btn-sm rounded-circle fw-bold" id="bn-minus" title="Giảm">−</button>
+            <input type="text" id="bn-qty" class="form-control form-control-sm border-0 bg-transparent text-center fw-bold shadow-none" value="{{ qty }}" style="width: 50px;" readonly>
+            <button type="button" class="btn btn-light btn-sm rounded-circle fw-bold" id="bn-plus" title="Thêm">+</button>
+          </div>
+          <small class="text-muted d-block mt-1" id="bn-hint">Tối đa {{ variant.stock }} cái (theo tồn kho)</small>
+        </div>
+        <script>
+        (function () {
+          var q = parseInt(document.getElementById('bn-qty').value || '1', 10);
+          var max = parseInt('{{ variant.stock }}', 10) || 1;
+          var unit = parseFloat('{{ unit_price }}');
+          function fmt(n){ try { return n.toLocaleString('vi-VN'); } catch(e){ return n; } }
+          function paint() {
+            document.getElementById('bn-qty').value = q;
+            document.getElementById('bn-line').textContent = fmt(unit) + ' đ x ' + q + ' = ' + fmt(unit * q) + ' đ';
+            document.getElementById('bn-minus').disabled = (q <= 1);
+            document.getElementById('bn-plus').disabled = (q >= max);
+          }
+          function push(nq) {
+            fetch('{{ url_for('buy_now_qty') }}', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+              body: 'qty=' + nq
+            }).then(function (r) { return r.json(); }).then(function (d) {
+              if (d.ok) { q = d.qty; if (d.max) max = d.max; }
+              paint();
+            }).catch(paint);
+          }
+          document.getElementById('bn-minus').addEventListener('click', function () { if (q > 1) push(q - 1); });
+          document.getElementById('bn-plus').addEventListener('click', function () { if (q < max) push(q + 1); });
+          paint();
+        })();
+        </script>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="bg-white rounded-4 shadow-sm p-4">
+        {% if not (current_user.is_admin == 1 or current_user.role == 'Nhân viên') %}
+        <div class="small fw-bold mb-2">Freeship đơn từ {{ '{:,.0f}'.format(freeship_threshold) }}đ{% if total_amount >= freeship_threshold %} — đơn này được FREESHIP{% else %} — còn thiếu {{ '{:,.0f}'.format(freeship_threshold - total_amount) }}đ{% endif %}</div>
+        {% endif %}
+        <form action="{{ url_for('checkout_direct') }}" method="POST">
+          {% if current_user.is_admin == 1 or current_user.role == 'Nhân viên' %}
+          <div class="mb-3"><label class="form-label small fw-bold">Tên khách hàng</label><input name="customer_name" class="form-control" placeholder="Tên khách tới mua..."></div>
+          <div class="mb-3"><label class="form-label small fw-bold">Địa chỉ <span class="text-muted">(để trống = Mua tại cửa hàng)</span></label><input name="address" class="form-control" placeholder="Để trống nếu khách lấy tại shop..."></div>
+          {% else %}
+          <div class="mb-3"><label class="form-label small fw-bold">Địa chỉ *</label><input name="address" class="form-control" required placeholder="Số nhà, đường..."></div>
+          {% endif %}
+          <div class="mb-3"><label class="form-label small fw-bold">SĐT *</label><input name="phone" class="form-control" required placeholder="SĐT liên hệ"></div>
+          {% if not (current_user.is_admin == 1 or current_user.role == 'Nhân viên') %}
+          <div class="mb-3"><label class="form-label small fw-bold">Mã giảm giá</label><input name="voucher_code" class="form-control" placeholder="Nếu có"></div>
+          {% if show_gift and gifts %}
+          <div class="mb-3"><label class="form-label small fw-bold">🎁 Chọn 1 quà</label>
+            <select name="gift_id" class="form-select"><option value="">Không lấy quà</option>{% for g in gifts %}<option value="{{ g.id }}">{{ g.name }} (còn {{ g.stock }})</option>{% endfor %}</select>
+          </div>
+          {% endif %}
+          <div class="mb-3"><label class="form-label small fw-bold">Khu vực *</label>
+            <select name="ship_zone" class="form-select" required><option value="noi_thanh">Nội thành — Miễn phí</option><option value="ngoai_thanh">Ngoại thành — 30.000đ (free nếu đủ {{ '{:,.0f}'.format(freeship_threshold) }}đ)</option></select>
+          </div>
+          <div class="mb-3"><label class="form-label small fw-bold">Hãng vận chuyển *</label>
+            <select name="ship_carrier" class="form-select">
+              {% for code, label, fee in ship_carriers %}
+              <option value="{{ code }}">{{ label }}{% if fee %} (+{{ '{:,.0f}'.format(fee) }}đ){% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+          <div class="mb-3"><label class="form-label small fw-bold">Ghi chú (đồng kiểm...)</label><input name="note" class="form-control" maxlength="1000" placeholder="Cho xem hàng trước khi nhận..."></div>
+          <div class="form-check mb-3"><input type="checkbox" name="dong_kiem" value="1" class="form-check-input" checked><label class="form-check-label small fw-bold">Đồng kiểm: cho xem hàng trước khi nhận</label></div>
+          <div class="mb-3"><label class="form-label small fw-bold">Thanh toán</label>
+            <select name="payment_method" class="form-select"><option value="COD">COD</option><option value="Chuyển khoản">Chuyển khoản (QR)</option><option value="ATM">Thẻ ATM</option><option value="Visa">Visa/Master</option><option value="Ví điện tử">Ví điện tử</option></select>
+            {% if not (current_user.is_admin == 1 or current_user.role == 'Nhân viên') %}
+            <div class="form-text small"><a href="{{ url_for('bank_guide') }}">Xem STK shop + hướng dẫn báo đã chuyển</a></div>
+            {% endif %}
+          </div>
+          <button class="btn btn-dark w-100 fw-bold btn-lg" type="submit">Đặt hàng ngay</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <div class="mb-4">
+    <h3 class="fw-bold text-dark text-uppercase">Báo cáo tồn bigsize M-5XL</h3>
+    <p class="text-muted small mb-0">Đơn <b>Hoàn thành</b> - Tồn chết &gt;90 ngày đưa vào sale Mua 1 tặng 1.</p>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm p-4 bg-white h-100" style="border-radius: 16px;">
+        <h5 class="fw-bold mb-3">Bán chạy theo Size</h5>
+        {% if by_size %}
+        {% set max_sold = by_size[0].sold %}
+        {% for r in by_size %}
+        <div class="mb-2">
+          <div class="d-flex justify-content-between small mb-1"><b>Size {{ r.label }}</b><span>{{ r.sold }} cái</span></div>
+          <div class="progress" style="height: 8px;"><div class="progress-bar bg-primary" style="width: {{ (r.sold * 100 / max_sold)|round(0) }}%;"></div></div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-muted small mb-0">Chưa có đơn hoàn thành nào.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm p-4 bg-white h-100" style="border-radius: 16px;">
+        <h5 class="fw-bold mb-3">Bán chạy theo Màu</h5>
+        {% if by_color %}
+        {% set max_sold = by_color[0].sold %}
+        {% for r in by_color %}
+        <div class="mb-2">
+          <div class="d-flex justify-content-between small mb-1"><b>{{ r.label }}</b><span>{{ r.sold }} cái</span></div>
+          <div class="progress" style="height: 8px;"><div class="progress-bar" style="width: {{ (r.sold * 100 / max_sold)|round(0) }}%; background: #ff6384;"></div></div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-muted small mb-0">Chưa có đơn hoàn thành nào.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm bg-white p-0" style="border-radius: 16px; overflow: hidden;">
+    <div class="p-3 px-4 border-bottom"><h5 class="fw-bold mb-0">Tồn kho từng phân loại + gợi ý</h5></div>
+    <div class="table-responsive">
+      <table class="table table-admin table-hover mb-0 align-middle">
+        <thead>
+          <tr><th class="ps-4">Sản phẩm</th><th class="text-center">Size/Màu</th><th class="text-center">Tồn</th><th class="text-center">Bán 30 ngày</th><th>Bán gần nhất</th><th class="text-end pe-4">Gợi ý</th></tr>
+        </thead>
+        <tbody>
+          {% for r in stock_rows %}
+          <tr>
+            <td class="ps-4"><a href="{{ url_for('admin_edit_product', product_id=r.product_id) }}" class="fw-bold text-dark text-decoration-none">{{ r.name }}</a></td>
+            <td class="text-center"><span class="badge bg-light text-dark border">{{ r.size }}/{{ r.color }}</span></td>
+            <td class="text-center fw-bold {% if r.stock <= 0 %}text-danger{% elif r.stock <= 5 %}text-warning{% else %}text-success{% endif %}">{{ r.stock }}</td>
+            <td class="text-center">{{ r.sold_30d }}</td>
+            <td class="text-muted small">{{ r.last_sold or 'Chưa từng bán' }}</td>
+            <td class="text-end pe-4"><span class="badge bg-{{ r.tip_class }}">{{ r.tip }}</span></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="text-center py-4 text-muted">Chưa có biến thể nào.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

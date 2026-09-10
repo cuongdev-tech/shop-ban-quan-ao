@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <h3 class="fw-bold text-uppercase mb-1">Nhật ký NV + hoa hồng ({{ rate }}%)</h3>
+  <form method="GET" class="bg-white rounded-4 shadow-sm p-3 mb-3 d-flex gap-2 align-items-end">
+    <div><label class="form-label small fw-bold">Tháng</label><input name="month_num" class="form-control" value="{{ month }}" maxlength="2"></div>
+    <div><label class="form-label small fw-bold">Năm</label><input name="year_num" class="form-control" value="{{ year }}" maxlength="4"></div>
+    <button class="btn btn-dark fw-bold" type="submit">Lọc</button>
+  </form>
+  <div class="bg-white rounded-4 shadow-sm p-4 mb-3">
+    <h6 class="fw-bold">Hoa hồng theo doanh thu Hoàn thành ({{ month }}/{{ year }})</h6>
+    <table class="table table-sm mb-0"><thead><tr><th>NV</th><th class="text-center">Đơn chốt</th><th class="text-end">Doanh thu</th><th class="text-end">Hoa hồng</th></tr></thead>
+    <tbody>{% for r in comm %}<tr><td>{{ r.uname }}</td><td class="text-center">{{ r.orders or 0 }}</td><td class="text-end">{{ '{:,.0f}'.format(r.rev or 0) }}đ</td><td class="text-end fw-bold text-success">{{ '{:,.0f}'.format(r.commission or 0) }}đ</td></tr>{% else %}<tr><td colspan="4" class="text-muted text-center">Chưa có.</td></tr>{% endfor %}</tbody></table>
+    <small class="text-muted">Đổi tỉ lệ ở <a href="{{ url_for('admin_settings') }}">Cấu hình</a>.</small>
+  </div>
+  <div class="bg-white rounded-4 shadow-sm p-4">
+    <h6 class="fw-bold">Nhật ký (200 mới nhất)</h6>
+    <table class="table table-sm mb-0"><thead><tr><th>NV</th><th>Thao tác</th><th>Đơn</th><th>Chi tiết</th><th>Lúc</th></tr></thead>
+    <tbody>{% for l in logs %}<tr><td>{{ l.uname }}</td><td>{{ l.action }}</td><td>{% if l.order_id %}<a href="{{ url_for('admin_order_detail', order_id=l.order_id) }}">#{{ l.order_id }}</a>{% endif %}</td><td class="small">{{ l.detail or '' }}</td><td class="small text-muted">{{ l.created_at }}</td></tr>{% else %}<tr><td colspan="5" class="text-muted text-center">Chưa có.</td></tr>{% endfor %}</tbody></table>
+  </div>
+</div>
+{% endblock %}

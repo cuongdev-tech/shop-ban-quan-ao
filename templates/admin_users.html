@@ -1,99 +1,116 @@
 {% extends 'layout.html' %}
 {% block content %}
 <div class="container-xl mt-4 mb-5">
-    
-    <div class="mb-4">
-        <h3 class="fw-bold text-dark">Quản lý Tài khoản & Nhân sự</h3>
-        <p class="text-muted small mb-0">Thêm mới và quản lý phân quyền tài khoản Quản trị, Nhân viên, Khách hàng</p>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h3 class="fw-bold text-dark text-uppercase">Quản lý tài khoản 3 vai trò</h3>
+            <p class="text-muted small mb-0">Admin / Nhân viên / Khách hàng - Cùng 1 tone đen tối giản</p>
+        </div>
+        <button type="button" class="btn btn-dark btn-sm fw-bold px-4 shadow-sm text-uppercase" data-bs-toggle="modal" data-bs-target="#addStaffModal">Thêm nhân sự</button>
     </div>
 
-    <div class="row g-4">
-        <!-- Cột trái: Form thêm nhân sự mới -->
-        <div class="col-lg-5">
-            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
-                <div class="text-center mb-4">
-                    <h4 class="fw-bold text-dark">Thêm Nhân sự Hệ thống</h4>
-                    <p class="text-muted small">Tạo tài khoản quản trị hoặc nhân viên bán hàng</p>
-                </div>
-                
-                <form method="POST">
-                    {{ form.hidden_tag() }}
-                    
-                    <div class="mb-3">
-                        {{ form.role.label(class_='form-label fw-semibold text-secondary small') }}
-                        {{ form.role(class_='form-select bg-light border-0 py-2') }}
-                    </div>
-                    
-                    <div class="mb-3">
-                        {{ form.name.label(class_='form-label fw-semibold text-secondary small') }}
-                        {{ form.name(class_='form-control bg-light border-0 py-2', placeholder='Nhập họ và tên') }}
-                    </div>
-                    
-                    <div class="mb-3">
-                        {{ form.email.label(class_='form-label fw-semibold text-secondary small') }}
-                        {{ form.email(class_='form-control bg-light border-0 py-2', placeholder='name@example.com') }}
-                    </div>
-                    
-                    <div class="mb-4">
-                        {{ form.password.label(class_='form-label fw-semibold text-secondary small') }}
-                        {{ form.password(class_='form-control bg-light border-0 py-2', placeholder='Mật khẩu') }}
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow-sm">Thêm nhân sự</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Cột phải: Bảng danh sách toàn bộ tài khoản -->
-        <div class="col-lg-7">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
-                <div class="table-responsive">
-                    <table class="table align-middle mb-0">
-                        <thead class="table-light text-uppercase fs-7 text-secondary">
-                            <tr>
-                                <th class="py-3 ps-4">ID</th>
-                                <th class="py-3">Họ tên & Email</th>
-                                <th class="py-3">Vai trò</th>
-                                <th class="py-3 text-end pe-4">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if users %}
-                                {% for u in users %}
-                                <tr>
-                                    <td class="ps-4 fw-bold text-muted">#{{ u.id }}</td>
-                                    <td>
-                                        <div class="fw-bold text-dark">{{ u.name }}</div>
-                                        <div class="text-muted small">{{ u.email }}</div>
-                                    </td>
-                                    <td>
-                                        <span class="badge 
-                                            {% if u.role == 'Admin' %}bg-danger
-                                            {% elif u.role == 'Nhân viên' %}bg-success
-                                            {% else %}bg-secondary{% endif %} px-3 py-2">
-                                            {{ u.role }}
-                                        </span>
-                                    </td>
-                                    <td class="text-end pe-4">
-                                        {% if u.role != 'Khách hàng' %}
-                                            <a href="{{ url_for('admin_edit_user', user_id=u.id) }}" class="btn btn-sm btn-outline-primary fw-semibold px-3 rounded-pill">Sửa / Đổi MK</a>
-                                        {% else %}
-                                            <span class="text-muted small fst-italic">Không khả dụng</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            {% else %}
-                                <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">Chưa có tài khoản nào.</td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    <!-- Bảng danh sách toàn bộ tài khoản -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="table-responsive">
+            <table class="table table-admin align-middle mb-0">
+                <thead class="table-light text-uppercase fs-7 text-secondary">
+                    <tr>
+                        <th class="py-3 ps-4">ID</th>
+                        <th class="py-3">Họ tên & Email</th>
+                        <th class="py-3">Vai trò</th>
+                        <th class="py-3 text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if users %}
+                        {% for u in users %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-muted">#{{ u.id }}</td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ u.name }}</div>
+                                <div class="text-muted small">{{ u.email }}</div>
+                            </td>
+                            <td>
+                                <span class="badge
+                                    {% if u.role == 'Admin' %}bg-danger
+                                    {% elif u.role == 'Nhân viên' %}bg-success
+                                    {% else %}bg-secondary{% endif %} px-3 py-2">
+                                    {{ u.role }}
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                {% if u.role != 'Khách hàng' %}
+                                    <a href="{{ url_for('admin_edit_user', user_id=u.id) }}" class="btn btn-sm btn-outline-primary fw-semibold px-3 rounded-pill">Sửa / Đổi MK</a>
+                                {% else %}
+                                    <span class="text-muted small fst-italic">Không khả dụng</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">Chưa có tài khoản nào.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
         </div>
     </div>
 
 </div>
+
+<!-- Modal thêm nhân sự hệ thống -->
+<div class="modal fade" id="addStaffModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4">
+      <div class="modal-header border-0 pb-0">
+        <div>
+          <h4 class="fw-bold text-dark mb-0">Thêm Nhân sự Hệ thống</h4>
+          <p class="text-muted small mb-0">Tạo tài khoản quản trị hoặc nhân viên bán hàng</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form method="POST">
+          {{ form.hidden_tag() }}
+
+          <div class="mb-3">
+            {{ form.role.label(class_='form-label fw-semibold text-secondary small') }}
+            {{ form.role(class_='form-select bg-light border-0 py-2') }}
+          </div>
+
+          <div class="mb-3">
+            {{ form.name.label(class_='form-label fw-semibold text-secondary small') }}
+            {{ form.name(class_='form-control bg-light border-0 py-2', placeholder='Nhập họ và tên') }}
+            {% for e in form.name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          </div>
+
+          <div class="mb-3">
+            {{ form.email.label(class_='form-label fw-semibold text-secondary small') }}
+            {{ form.email(class_='form-control bg-light border-0 py-2', placeholder='name@example.com') }}
+            {% for e in form.email.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          </div>
+
+          <div class="mb-4">
+            {{ form.password.label(class_='form-label fw-semibold text-secondary small') }}
+            {{ form.password(class_='form-control bg-light border-0 py-2', placeholder='Mật khẩu') }}
+            {% for e in form.password.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          </div>
+
+          <button type="submit" class="btn btn-dark btn-lg w-100 rounded-pill fw-bold shadow-sm text-uppercase">Thêm nhân sự</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if show_modal %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var m = new bootstrap.Modal(document.getElementById('addStaffModal'));
+    m.show();
+  });
+</script>
+{% endif %}
 {% endblock %}

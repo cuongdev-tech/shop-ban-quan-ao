@@ -17,8 +17,8 @@
     <!-- HEADER & BỘ LỌC THỜI GIAN GỌN GÀNG -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h4 class="fw-bold text-dark mb-1">Tổng quan Kinh doanh</h4>
-            <p class="text-muted small mb-0">Theo dõi số liệu và tình hình hoạt động của shop</p>
+            <h4 class="fw-bold text-dark mb-1 text-uppercase">Tổng quan kinh doanh</h4>
+            <p class="text-muted small mb-0">Doanh thu đơn hoàn thành - Tồn kho - GHN 24h/3-4 ngày</p>
         </div>
         <div class="d-flex align-items-center gap-3">
             
@@ -49,12 +49,12 @@
             
             <div class="dropdown">
                 <button class="btn btn-dark btn-sm fw-bold px-3 shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" style="border-radius: 8px; padding: 6px 12px;">
-                    📊 Xuất báo cáo
+                    Xuất báo cáo
                 </button>
                 <ul class="dropdown-menu shadow border-0" style="border-radius: 10px;">
                     <li><a class="dropdown-item py-2 fw-semibold" href="{{ url_for('export_excel') }}"> Tải xuống file Excel (.xlsx)</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item py-2 fw-semibold" href="{{ url_for('export_pdf') }}" target="_blank">🖨️ In / Lưu file PDF</a></li>
+                    <li><a class="dropdown-item py-2 fw-semibold" href="{{ url_for('export_pdf') }}" target="_blank">In / Lưu file PDF</a></li>
                 </ul>
             </div>
         </div>
@@ -64,7 +64,7 @@
     {% if low_stock %}
     <div class="alert alert-warning border-0 shadow-sm mb-4 d-flex align-items-center justify-content-between" style="border-radius: 14px;" role="alert">
         <div class="d-flex align-items-center gap-3">
-            <span class="fs-4"></span>
+            
             <div>
                 <h6 class="fw-bold mb-1 text-dark">Cảnh báo tồn kho thấp!</h6>
                 <p class="small text-muted mb-0">Có <b>{{ low_stock|length }}</b> sản phẩm sắp hết hàng (dưới hoặc bằng 5 món): 
@@ -81,46 +81,42 @@
     <!-- 4 THẺ THỐNG KÊ -->
     <div class="row g-3 mb-4">
         <div class="col-xl-3 col-md-6">
-            <div class="card p-3 shadow-sm bg-white stat-card h-100">
+            <div class="card p-3 shadow-sm stat-card stat-gradient stat-g1 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Doanh thu (Tháng chọn)</span>
-                    <div class="icon-box bg-success-subtle text-success"></div>
                 </div>
-                <h5 class="fw-bold text-success mb-1">{{ '{:,.0f}'.format(monthly_revenue) }} đ</h5>
-                <span class="text-muted" style="font-size: 0.75rem;">Tính theo đơn hoàn thành</span>
+                <h5 class="fw-bold mb-1">{{ '{:,.0f}'.format(monthly_revenue) }} đ</h5>
+                <span style="font-size: 0.75rem; opacity: .85;">Tính theo đơn hoàn thành</span>
             </div>
         </div>
 
         <div class="col-xl-3 col-md-6">
-            <div class="card p-3 shadow-sm bg-white stat-card h-100">
+            <div class="card p-3 shadow-sm stat-card stat-gradient stat-g2 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Tổng Đơn (Tháng chọn)</span>
-                    <div class="icon-box bg-primary-subtle text-primary"></div>
                 </div>
-                <h5 class="fw-bold text-dark mb-1">{{ monthly_orders_count }} đơn</h5>
-                <span class="text-primary fw-semibold" style="font-size: 0.75rem;"> Đã ghi nhận trong tháng</span>
+                <h5 class="fw-bold mb-1">{{ monthly_orders_count }} đơn</h5>
+                <span class="fw-semibold" style="font-size: 0.75rem; opacity: .85;">Đã ghi nhận trong tháng</span>
             </div>
         </div>
 
         <div class="col-xl-3 col-md-6">
-            <div class="card p-3 shadow-sm bg-white stat-card h-100">
+            <div class="card p-3 shadow-sm stat-card stat-gradient stat-g3 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Sản phẩm sẵn bán</span>
-                    <div class="icon-box bg-warning-subtle text-warning"></div>
                 </div>
-                <h5 class="fw-bold text-dark mb-1">{{ products|length }} món</h5>
-                <span class="text-muted" style="font-size: 0.75rem;">Đủ các danh mục áo quần</span>
+                <h5 class="fw-bold mb-1">{{ products|length }} món</h5>
+                <span style="font-size: 0.75rem; opacity: .85;">Đủ các danh mục áo quần</span>
             </div>
         </div>
 
         <div class="col-xl-3 col-md-6">
-            <div class="card p-3 shadow-sm bg-white stat-card h-100">
+            <div class="card p-3 shadow-sm stat-card stat-gradient stat-g4 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Hiệu suất Shop</span>
-                    <div class="icon-box bg-info-subtle text-info"></div>
                 </div>
-                <h5 class="fw-bold text-dark mb-1">{{ '{:.1f}'.format(efficiency_rate) }}%</h5>
-                <span class="text-success fw-semibold" style="font-size: 0.75rem;">🟢 Hoạt động ổn định</span>
+                <h5 class="fw-bold mb-1">{{ '{:.1f}'.format(efficiency_rate) }}%</h5>
+                <span class="fw-semibold" style="font-size: 0.75rem; opacity: .85;">Hoạt động ổn định</span>
             </div>
         </div>
     </div>
@@ -136,9 +132,7 @@
                 <div class="position-relative mx-auto" style="width: 220px; height: 220px;">
                     <canvas id="categoryChart"></canvas>
                 </div>
-                <div class="mt-3 text-center text-muted small">
-                    <span class="me-2">● Áo (60%)</span> <span class="me-2">● Quần (28%)</span> <span>● Váy (12%)</span>
-                </div>
+                <div class="mt-3 text-center text-muted small" id="catLegend"></div>
             </div>
         </div>
 
@@ -162,7 +156,7 @@
             <a href="{{ url_for('admin_orders') }}" class="text-decoration-none fw-bold small text-primary">Xem tất cả →</a>
         </div>
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-hover table-admin mb-0">
                 <thead>
                     <tr>
                         <th class="ps-4">Mã đơn</th>
@@ -203,22 +197,39 @@
 </div>
 
 <script>
+    // Dữ liệu thật từ backend (thay số cứng cũ)
+    const catLabels = [{% for r in cat_rows %}"{{ r.cat }}"{% if not loop.last %},{% endif %}{% endfor %}];
+    const catData = [{% for r in cat_rows %}{{ r.rev|int }}{% if not loop.last %},{% endif %}{% endfor %}];
+    const trendLabels = [{% for r in trend_rows %}"Tháng {{ r.m }}"{% if not loop.last %},{% endif %}{% endfor %}];
+    const trendData = [{% for r in trend_rows %}{{ r.rev|int }}{% if not loop.last %},{% endif %}{% endfor %}];
+    const catPalette = ['#e1436b', '#7c3aed', '#f5a623', '#10b981', '#3b82f6', '#ef4444'];
     const ctxCategory = document.getElementById('categoryChart').getContext('2d');
     new Chart(ctxCategory, {
         type: 'doughnut',
         data: {
-            labels: ['Áo sơ mi & Khoác', 'Quần jeans & Jogger', 'Váy & Set bộ'],
-            datasets: [{ data: [1450000, 700000, 300000], backgroundColor: ['#ff6384', '#36a2eb', '#ffce56'], borderWidth: 0 }]
+            labels: catLabels.length ? catLabels : ['Chưa có dữ liệu'],
+            datasets: [{ data: catData.length ? catData : [1], backgroundColor: catPalette, borderWidth: 0 }]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '75%' }
     });
+    // Chú thích động theo dữ liệu thật
+    (function () {
+        var box = document.getElementById('catLegend');
+        if (!box) return;
+        if (!catLabels.length) { box.textContent = 'Chưa có dữ liệu tháng này.'; return; }
+        var total = catData.reduce(function (a, b) { return a + b; }, 0) || 1;
+        box.innerHTML = catLabels.map(function (lb, i) {
+            var pct = Math.round(catData[i] * 100 / total);
+            return '<span class="me-2"><span style="color:' + catPalette[i % catPalette.length] + ';">●</span> ' + lb + ' (' + pct + '%)</span>';
+        }).join('');
+    })();
 
     const ctxTrend = document.getElementById('trendChart').getContext('2d');
     new Chart(ctxTrend, {
         type: 'bar',
         data: {
-            labels: ['Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8'],
-            datasets: [{ label: 'Doanh thu (đ)', data: [800000, 1200000, 1900000, 2450000], backgroundColor: ['#e2e8f0', '#cbd5e1', '#3b82f6', '#10b981'], borderRadius: 6 }]
+            labels: trendLabels.length ? trendLabels : ['Chưa có dữ liệu'],
+            datasets: [{ label: 'Doanh thu (đ)', data: trendData.length ? trendData : [0], backgroundColor: ['#f3cdd9', '#e79fb8', '#e1436b', '#10b981'], borderRadius: 6 }]
         },
         options: {
             responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },

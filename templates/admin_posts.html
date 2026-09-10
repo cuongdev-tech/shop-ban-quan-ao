@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold text-uppercase mb-0">Bài phối đồ</h3>
+    <a href="{{ url_for('admin_post_add') }}" class="btn btn-dark rounded-pill px-4 fw-bold">+ Thêm bài</a>
+  </div>
+  <div class="card border-0 shadow-sm bg-white" style="border-radius:14px;overflow:hidden;">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-light"><tr><th class="ps-4">Tiêu đề</th><th>Collection</th><th class="text-center">Hiện</th><th class="text-end pe-4">Thao tác</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr><td class="ps-4 fw-bold">{{ r.title }}<br><small class="text-muted">{{ r.slug }}</small></td><td>{{ r.ctitle or '' }}</td>
+        <td class="text-center">{% if r.is_active %}<span class="badge bg-success">Hiện</span>{% else %}<span class="badge bg-secondary">Ẩn</span>{% endif %}</td>
+        <td class="text-end pe-4"><a href="{{ url_for('admin_post_edit', pid=r.id) }}" class="btn btn-outline-dark btn-sm rounded-pill">Sửa</a>
+        <form action="{{ url_for('admin_post_delete', pid=r.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Xóa bài?');"><button class="btn btn-outline-danger btn-sm rounded-pill" type="submit">Xóa</button></form></td></tr>
+        {% else %}<tr><td colspan="4" class="text-center text-muted py-4">Chưa có.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

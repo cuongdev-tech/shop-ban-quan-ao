@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <h3 class="fw-bold text-uppercase mb-3">Hồ sơ ứng tuyển</h3>
+  <div class="mb-3 d-flex gap-2 flex-wrap">
+    <a href="{{ url_for('admin_applications') }}" class="btn btn-sm rounded-pill {% if not status %}btn-dark{% else %}btn-outline-secondary{% endif %} fw-bold">Tất cả</a>
+    {% for s in ['Moi','Da_xem','Dat','Loai'] %}
+    <a href="{{ url_for('admin_applications', status=s) }}" class="btn btn-sm rounded-pill {% if status==s %}btn-dark{% else %}btn-outline-secondary{% endif %} fw-bold">{{ s }} ({{ counts[s] }})</a>
+    {% endfor %}
+  </div>
+  {% for r in rows %}
+  <div class="bg-white rounded-4 shadow-sm p-4 mb-3">
+    <div class="d-flex justify-content-between flex-wrap gap-2"><b>{{ r.name }} — {{ r.phone }}{% if r.email %} — {{ r.email }}{% endif %}</b><small class="text-muted">{{ r.jtitle }} | {{ r.created_at }} | {{ r.status }}</small></div>
+    <div class="mt-2 small" style="white-space:pre-line;">{{ r.cv_text }}</div>
+    <form action="{{ url_for('admin_application_status', aid=r.id) }}" method="POST" class="d-flex gap-2 mt-3">
+      <select name="status" class="form-select form-select-sm w-auto">
+        {% for s in ['Moi','Da_xem','Dat','Loai'] %}<option value="{{ s }}" {% if r.status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+      </select>
+      <button class="btn btn-dark btn-sm fw-bold px-3" type="submit">Cập nhật</button>
+    </form>
+  </div>
+  {% else %}
+  <div class="text-center text-muted py-5">Không có hồ sơ.</div>
+  {% endfor %}
+</div>
+{% endblock %}

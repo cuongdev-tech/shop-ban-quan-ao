@@ -1,52 +1,187 @@
 {% extends 'layout.html' %}
 {% block content %}
 <div class="container-xl mt-4 mb-5">
+
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small mb-0">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('index', category=product.category) }}" class="text-decoration-none">{{ product.category }}</a></li>
+            <li class="breadcrumb-item active text-truncate" style="max-width: 320px;">{{ product.name }}</li>
+        </ol>
+    </nav>
     
-    <!-- KHỐI 1: THÔNG TIN SẢN PHẨM -->
-    <div class="row bg-white p-4 rounded-4 shadow-sm mb-5 align-items-center">
+    <!-- KHOI 1: THONG TIN SP - GIU NGUYEN LOGIC -->
+    <div class="row bg-white p-4 rounded-4 shadow-sm mb-4 align-items-start">
         <div class="col-md-5 mb-4 mb-md-0 text-center">
-            <img src="{{ product.image }}" alt="{{ product.name }}" class="img-fluid rounded-4 shadow-sm" style="width: 100%; object-fit: cover; max-height: 450px;">
-        </div>
-        <div class="col-md-7 d-flex flex-column justify-content-center px-lg-5">
-            <div class="mb-3">
-                <span class="badge bg-secondary px-3 py-2 fs-6 rounded-pill">{{ product.category }}</span>
+            <img id="main-img" src="{{ product.image }}" alt="{{ product.name }}" class="img-fluid rounded-4 shadow-sm" style="width: 100%; object-fit: cover; max-height: 450px;">
+            {% if gallery %}
+            <div class="d-flex gap-2 justify-content-center mt-2 flex-wrap">
+                <img src="{{ product.image }}" data-full="{{ product.image }}" class="thumb-img rounded border {% if not gallery %}d-none{% endif %}" style="width:64px;height:64px;object-fit:cover;cursor:pointer;" alt="Ảnh chính">
+                {% for g in gallery %}
+                <img src="{{ g.image_url }}" data-full="{{ g.image_url }}" class="thumb-img rounded border" style="width:64px;height:64px;object-fit:cover;cursor:pointer;" alt="Ảnh {{ loop.index }}" loading="lazy">
+                {% endfor %}
             </div>
-            <h2 class="fw-bold mb-3 text-dark">{{ product.name }}</h2>
+            {% endif %}
+            {% if product.video_url %}
+            <div class="mt-3">
+                {% if 'youtube.com' in product.video_url or 'youtu.be' in product.video_url %}
+                <div class="ratio ratio-16x9"><iframe src="{{ product.video_url }}" allowfullscreen loading="lazy"></iframe></div>
+                {% else %}
+                <video controls preload="none" class="w-100 rounded-4 border" style="max-height:320px;"><source src="{{ product.video_url }}"></video>
+                {% endif %}
+                <small class="text-muted">Video mặc thử</small>
+            </div>
+            {% endif %}
+            <div class="d-flex gap-2 justify-content-center mt-2">
+                <span class="badge bg-light text-dark border">{{ product.material or 'Ảnh thật' }}</span>
+                <span class="badge bg-light text-dark border">{{ product.fit or 'Form Basic' }}</span>
+            </div>
+        </div>
+        <div class="col-md-7 d-flex flex-column justify-content-center px-lg-4">
+            <div class="mb-2 small text-muted">Mã sản phẩm: <b class="text-dark">FS{{ product.id }}OSH</b> | Tình trạng: <b class="{% if product.stock>0 %}text-success{% else %}text-danger{% endif %}">{% if product.stock>0 %}Còn hàng{% else %}Hết hàng{% endif %}</b> | Thương hiệu: <b class="text-dark">{{ product.brand or 'FashionShop' }}</b></div>
+            <div class="mb-2">
+                <span class="badge bg-dark px-3 py-2 rounded-pill text-uppercase">{{ product.category }}</span>
+            </div>
+            <h2 class="fw-bold mb-2 text-dark">{{ product.name }}</h2>
+            <div class="mb-3">
+                {% if total_reviews and total_reviews > 0 %}
+                <a href="#danh-gia" class="text-decoration-none"><span class="text-gold fw-bold fs-5">{% for i in range(1, 6) %}{% if i <= avg_rating|round(0, 'floor')|int %}★{% else %}☆{% endif %}{% endfor %} {{ avg_rating }}</span> <span class="text-muted small">({{ total_reviews }} đánh giá)</span></a>
+                {% else %}
+                <span class="text-muted small">Chưa có đánh giá</span>
+                {% endif %}
+            </div>
             
-            <div class="d-flex align-items-center mb-4">
-                <h2 class="text-danger fw-bold mb-0 me-4">{{ '{:,.0f}'.format(product.price) }} đ</h2>
+            <div class="d-flex align-items-center mb-4 flex-wrap gap-2">
+                {% if product.on_sale %}
+                <span class="text-muted text-decoration-line-through fs-5">{{ '{:,.0f}'.format(product.price) }} đ</span>
+                <h2 class="text-danger fw-bold mb-0 me-2">{{ '{:,.0f}'.format(product.eff_price) }} đ</h2>
+                <span class="badge bg-danger rounded-pill">-{{ product.discount_pct }}%</span>
+                {% else %}
+                <h2 class="text-danger fw-bold mb-0 me-4">{{ '{:,.0f}'.format(product.eff_price) }} đ</h2>
+                {% endif %}
                 <!-- Hiển thị số lượng kho -->
                 <span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill">
                     Còn {{ product.stock }} sản phẩm
                 </span>
+                <span id="variant-stock" class="badge bg-light text-dark border px-3 py-2 rounded-pill"></span>
             </div>
+            {% if product.material or product.fit or product.size_note %}
+            <div class="mb-3 small">
+                {% if product.material %}<div><b>Chất liệu:</b> {{ product.material }}</div>{% endif %}
+                {% if product.fit %}<div><b>Form:</b> {{ product.fit }}</div>{% endif %}
+                {% if product.size_note %}<div><b>Size:</b> {{ product.size_note }}</div>{% endif %}
+            </div>
+            {% endif %}
             
             <div class="mb-4">
                 <h6 class="fw-bold text-dark mb-2">Mô tả sản phẩm:</h6>
                 <p class="text-muted fs-6" style="line-height: 1.6;">{{ product.description }}</p>
             </div>
             
-            <!-- LOGIC CHẶN NÚT THÊM VÀO GIỎ HÀNG -->
-            <div class="d-flex gap-3 mt-2">
-                {% if product.stock > 0 %}
-                    <a href="{{ url_for('add_to_cart', product_id=product.id) }}" class="btn btn-primary btn-lg px-4 shadow-sm fw-bold d-flex align-items-center gap-2">
-                        <i class="bi bi-cart-plus fs-5"></i> Thêm vào giỏ hàng
-                    </a>
-                {% else %}
-                    <button class="btn btn-secondary btn-lg px-4 shadow-sm fw-bold d-flex align-items-center gap-2" disabled>
-                        <i class="bi bi-x-circle fs-5"></i> Tạm hết hàng
+            <!-- CHON SIZE / MAU DANG NUT - VAN GUI Size|Mau CU -->
+            {% if variants %}
+            <div class="mb-3">
+                <h6 class="fw-bold text-dark mb-2 text-uppercase small">Màu sắc / Kích thước: <a href="{{ url_for('size_guide') }}" target="_blank" class="small fw-semibold text-decoration-none">📏 Bảng size + gợi ý</a></h6>
+                <div class="d-flex flex-wrap gap-2 mb-2" id="variant-pills">
+                    {% for v in variants %}
+                    <button type="button" data-val="{{ v.size }}|{{ v.color }}" {% if v.stock<=0 %}disabled{% endif %} class="variant-pill {% if v.stock<=0 %}disabled{% endif %}">
+                        {{ v.size }} / {{ v.color }}{% if v.stock > 0 %} ({{ v.stock }}){% else %} (hết){% endif %}
                     </button>
-                {% endif %}
-                <a href="{{ url_for('cart') }}" class="btn btn-outline-secondary btn-lg px-4 shadow-sm fw-bold">Xem giỏ hàng</a>
+                    {% endfor %}
+                </div>
             </div>
+            {% endif %}
+
+            <!-- NUT MUA: thêm giỏ + mua ngay đi thẳng thanh toán -->
+            <div class="d-flex gap-2 mt-2 flex-wrap align-items-end">
+                {% if product.stock > 0 %}
+                    <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST" class="m-0 d-flex gap-2 flex-wrap align-items-end w-100" id="buy-form">
+                        <div class="flex-fill" style="min-width:200px;">
+                            <label class="form-label small fw-bold mb-1 text-uppercase">Size / Màu đã chọn</label>
+                            <select name="variant" id="variant-select" class="form-select" required>
+                                {% for v in variants %}
+                                {% if v.stock > 0 %}
+                                <option value="{{ v.size }}|{{ v.color }}">{{ v.size }} / {{ v.color }} (còn {{ v.stock }})</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div style="min-width:110px;">
+                            <label class="form-label small fw-bold mb-1 text-uppercase">Số lượng</label>
+                            <input type="number" name="quantity" id="buy-qty" class="form-control" value="1" min="1" max="{{ product.stock }}">
+                        </div>
+                        {% if product.has_gift %}<div class="mb-1 small w-100">🎁 SP có quà kèm (1 đơn 1 quà, chọn ở giỏ/thanh toán)</div>{% endif %}
+                        {% if product.on_sale or product.category in ['Phụ kiện','phụ kiện'] %}<div class="mb-1 small w-100 text-danger">Hàng Sale/Phụ kiện không đổi/trả.</div>{% endif %}
+                        <button type="submit" class="btn btn-fs-dark btn-lg px-4 flex-fill">
+                            <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                        </button>
+                    </form>
+                    <form action="{{ url_for('buy_now', product_id=product.id) }}" method="POST" class="m-0 d-flex w-100" id="buynow-form">
+                        <input type="hidden" name="variant" id="buynow-variant" value="">
+                        <input type="hidden" name="quantity" id="buynow-qty" value="1">
+                        <button type="submit" class="btn btn-fs-light btn-lg px-4 flex-fill">Mua ngay (bỏ qua giỏ)</button>
+                    </form>
+                    <script>
+                    (function(){var s=document.getElementById('variant-select'),q=document.getElementById('buy-qty'),bv=document.getElementById('buynow-variant'),bq=document.getElementById('buynow-qty'),f=document.getElementById('buynow-form');
+                    function sync(){if(s&&bv)bv.value=s.value;if(q&&bq)bq.value=q.value;}
+                    if(s)s.addEventListener('change',sync);if(q)q.addEventListener('change',sync);if(f)f.addEventListener('submit',sync);sync();})();
+                    </script>
+                {% else %}
+                    <button class="btn btn-secondary btn-lg px-4 fw-bold" disabled>Tạm hết hàng</button>
+                {% endif %}
+            </div>
+            <div class="trust-row p-2 mt-3 small text-muted">Kiểm hàng trước khi nhận - Đổi 14 ngày còn tem - Giao 24h nội thành / 3-4 ngày tỉnh - GHN</div>
         </div>
     </div>
 
+    <!-- TABS MO TA / DANH GIA / DOI / GIAO -->
+    <ul class="nav nav-tabs fs-tabs bg-white rounded-top-4 px-3 pt-2 shadow-sm" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-mota" type="button">Mô tả</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-danhgia" type="button">Đánh giá</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-doi" type="button">Chính sách đổi hàng</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-giao" type="button">Chính sách giao hàng</button></li>
+    </ul>
+    <div class="tab-content bg-white p-4 rounded-bottom-4 shadow-sm mb-4">
+        <div class="tab-pane fade show active" id="tab-mota">
+            <h5 class="fw-bold">{{ product.name }}{% if product.material %} - {{ product.material }}{% endif %}{% if product.fit %}, {{ product.fit }}{% endif %}</h5>
+            <p class="text-muted" style="line-height:1.7;">{{ product.description }}</p>
+            <ul class="small text-muted">
+                <li><b>Chất liệu:</b> {{ product.material or 'Mềm mại, thông thoáng, thấm hút tốt.' }}</li>
+                <li><b>Form:</b> {{ product.fit or 'Basic dễ mặc, phù hợp nhiều vóc dáng.' }}</li>
+                <li><b>Size:</b> {{ product.size_note or 'Đủ size S-XXL. Xem bảng size để chọn.' }} <a href="{{ url_for('size_guide') }}">Xem bảng size</a></li>
+            </ul>
+            <div class="accordion mt-3" id="faq">
+                {% for f in faqs %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#faq-{{ f.id }}" type="button">{{ f.question }}</button></h2>
+                    <div id="faq-{{ f.id }}" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small text-muted">{{ f.answer }}</div></div>
+                </div>
+                {% else %}
+                <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#faq1" type="button">FAQ - Vải có co giãn không? Size sao? Đổi được không?</button></h2><div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small text-muted">Vải co giãn tương đối, size S-XXL. Không vừa được đổi size trong 14 ngày còn tem (trừ Sale/Phụ kiện). <a href="{{ url_for('size_guide') }}">Xem bảng size</a>.</div></div></div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="tab-pane fade" id="tab-doi">
+            <p class="small text-muted">Được kiểm hàng trước khi nhận. Từ chối nhận nếu không ưng, không mất phí. Đã nhận vẫn đổi size ngang giá trong 14 ngày còn tem + hóa đơn. COD chịu ship 2 chiều, lỗi shop shop chịu. Hàng Sale và Phụ kiện tuyệt đối không đổi/trả. Shop không hỗ trợ trả hàng hoàn tiền.</p>
+        </div>
+        <div class="tab-pane fade" id="tab-giao">
+            <p class="small text-muted">Nội thành 24h sau xác nhận, tỉnh 3-4 ngày qua GHN, giao giờ hành chính 8h-17h. Chậm không báo trước được từ chối nhận và hoàn tiền 7-10 ngày.</p>
+        </div>
+        <div class="tab-pane fade" id="tab-danhgia"><a href="#danh-gia" class="btn btn-dark btn-sm">Xuống phần đánh giá</a></div>
+    </div>
+
     <!-- KHỐI 2: ĐÁNH GIÁ SẢN PHẨM -->
-    <div class="row">
-        <div class="col-lg-7 mb-4">
+    <div class="row" id="danh-gia">
+        <div class="{% if current_user.is_authenticated and (current_user.is_admin == 1 or current_user.role == 'Nhân viên') %}col-lg-12{% else %}col-lg-7{% endif %} mb-4">
             <div class="bg-white p-4 rounded-4 shadow-sm h-100">
-                <h5 class="fw-bold mb-4 border-bottom pb-3 text-dark">Phản hồi từ khách hàng</h5>
+                <h5 class="fw-bold mb-3 border-bottom pb-3 text-dark">Phản hồi từ khách hàng
+                  <span class="float-end">
+                    <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-sm btn-light rounded-pill {% if not star %}fw-bold{% endif %}">Tất cả</a>
+                    {% for s in [5,4,3,2,1] %}
+                    <a href="{{ url_for('product_detail', product_id=product.id, star=s) }}" class="btn btn-sm rounded-pill {% if star == s %}btn-warning{% else %}btn-light{% endif %}">{{ s }}★</a>
+                    {% endfor %}
+                  </span>
+                </h5>
                 {% if reviews %}
                     <div class="d-flex flex-column gap-3">
                         {% for review in reviews %}
@@ -55,31 +190,38 @@
                                 <h6 class="mb-0 fw-bold">{{ review.name }} <span class="text-warning small ms-2">({{ review.rating }} ★)</span></h6>
                                 <small class="text-muted">{{ review.created_at }}</small>
                             </div>
-                            <p class="mb-0 text-secondary">{{ review.comment }}</p>
+                            <p class="mb-2 text-secondary">{{ review.comment }}</p>
+                            {% if review.image_url %}
+                            <img src="{{ review.image_url }}" class="rounded-3 border" style="max-width: 220px; max-height: 220px; object-fit: cover;" loading="lazy">
+                            {% endif %}
+                            {% if review.reply %}
+                            <div class="mt-2 p-2 bg-white rounded small border"><b>Shop trả lời:</b> {{ review.reply }}</div>
+                            {% endif %}
+                            <div class="mt-2 d-flex align-items-center gap-2">
+                                <span class="small text-muted">👍 {{ review.helpful or 0 }} hữu ích</span>
+                                {% if current_user.is_authenticated and review.id not in voted_ids %}
+                                <form action="{{ url_for('review_helpful', rid=review.id) }}" method="POST" class="d-inline"><button class="btn btn-outline-success btn-sm rounded-pill" type="submit">Vote hữu ích</button></form>
+                                {% endif %}
+                            </div>
                         </div>
                         {% endfor %}
                     </div>
                 {% else %}
                     <div class="text-center py-5 text-muted">
                         <i class="bi bi-chat-square-text fs-1 opacity-50"></i>
-                        <h6 class="mt-3">Chưa có đánh giá nào.</h6>
+                        <h6 class="mt-3">{% if star %}Chưa có đánh giá {{ star }} sao nào.{% else %}Chưa có đánh giá nào.{% endif %}</h6>
                     </div>
                 {% endif %}
             </div>
         </div>
 
+        {% if not (current_user.is_authenticated and (current_user.is_admin == 1 or current_user.role == 'Nhân viên')) %}
         <div class="col-lg-5 mb-4">
             {% if not current_user.is_authenticated %}
                 <div class="card border-0 shadow-sm p-4 bg-white text-center rounded-4">
                     <h5 class="fw-bold mb-3">Đánh giá sản phẩm</h5>
                     <p class="text-muted small mb-3">Vui lòng đăng nhập để viết đánh giá của bạn.</p>
-                    <a href="{{ url_for('login') }}" class="btn btn-primary rounded-pill fw-bold">Đăng nhập ngay</a>
-                </div>
-            {% elif current_user.is_admin %}
-                <div class="card border-primary p-5 text-center bg-light rounded-4">
-                    <h5 class="text-primary fw-bold">Góc Quản Trị Viên</h5>
-                    <p class="text-muted small">Admin không thể tự đánh giá.</p>
-                    <a href="{{ url_for('admin_edit_product', product_id=product.id) }}" class="btn btn-primary mt-3 rounded-pill fw-bold">⚙️ Quản lý sản phẩm</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-dark rounded-pill fw-bold">Đăng nhập ngay</a>
                 </div>
             {% elif user_has_reviewed %}
                 <!-- NẾU ĐÃ ĐÁNH GIÁ RỒI THÌ HIỆN THÔNG BÁO THÀNH CÔNG, ẨN FORM -->
@@ -88,6 +230,12 @@
                         <h5 class="fw-bold text-success mb-2">✅ Bạn đã đánh giá sản phẩm này</h5>
                         <p class="text-muted small mb-0">Cảm ơn phản hồi của bạn đã giúp cửa hàng hoàn thiện hơn mỗi ngày!</p>
                     </div>
+                </div>
+            {% elif not has_purchased %}
+                <div class="card border-0 shadow-sm p-4 bg-white text-center rounded-4">
+                    <h5 class="fw-bold mb-3">Đánh giá sản phẩm</h5>
+                    <p class="text-muted small mb-3">Bạn cần mua và nhận hàng thành công mới được đánh giá sản phẩm này.</p>
+                    <a href="{{ url_for('my_orders') }}" class="btn btn-outline-primary rounded-pill fw-bold">Xem đơn của tôi</a>
                 </div>
             {% else %}
                 <!-- FORM ĐÁNH GIÁ KHI CHƯA ĐÁNH GIÁ -->
@@ -110,33 +258,46 @@
                             <label class="form-label small fw-bold">Cảm nhận:</label>
                             <textarea name="comment" class="form-control" rows="3" required placeholder="Chất liệu, form dáng..."></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold">Gửi đánh giá</button>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Ảnh thật (link, không bắt buộc):</label>
+                            <input type="url" name="image_url" class="form-control" maxlength="500" placeholder="https://...">
+                        </div>
+                        {% if recaptcha_site_key %}<div class="mb-3"><div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div></div>{% endif %}
+                        <button type="submit" class="btn btn-dark w-100 rounded-pill fw-bold">Gửi đánh giá (chờ duyệt)</button>
                     </form>
                 </div>
             {% endif %}
         </div>
+        {% endif %}
     </div>
 
     <!-- KHỐI 3: SẢN PHẨM LIÊN QUAN (CROSS-SELLING) -->
     {% if related_products %}
     <div class="row mt-5">
         <div class="col-12">
-            <h4 class="fw-bold mb-4 text-dark border-bottom pb-3">Sản phẩm liên quan</h4>
+            <h4 class="fw-bold mb-4 text-dark section-title">Sản phẩm liên quan</h4>
             <div class="row row-cols-1 row-cols-md-4 g-4">
                 {% for p in related_products %}
                 <div class="col">
-                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bg-white position-relative">
+                    <div class="card h-100 shadow-sm rounded-4 overflow-hidden bg-white position-relative product-card">
+                        <span class="fs-badge-gift" title="Quà tặng kèm">🎁</span>
                         <a href="{{ url_for('product_detail', product_id=p.id) }}">
-                            <img src="{{ p.image }}" class="card-img-top" style="height: 220px; object-fit: cover;" alt="{{ p.name }}">
+                            <img src="{{ p.image }}" class="card-img-top product-img" style="height: 220px; object-fit: cover;" alt="{{ p.name }}" loading="lazy">
                         </a>
+                        <div class="fs-actions px-2">
+                            <form action="{{ url_for('add_to_cart', product_id=p.id) }}" method="POST" class="m-0 flex-fill d-flex">
+                                <button type="submit" class="btn btn-dark w-100">Thêm vào giỏ</button>
+                            </form>
+                            <a href="{{ url_for('product_detail', product_id=p.id) }}" class="btn btn-light border flex-fill text-center">Xem nhanh</a>
+                        </div>
                         <div class="card-body d-flex flex-column p-3">
                             <span class="text-muted small mb-1">{{ p.category }}</span>
                             <h6 class="card-title fw-bold text-dark text-truncate mb-2">
                                 <a href="{{ url_for('product_detail', product_id=p.id) }}" class="text-dark text-decoration-none">{{ p.name }}</a>
                             </h6>
                             <div class="mt-auto d-flex align-items-center justify-content-between">
-                                <span class="text-danger fw-bold">{{ '{:,.0f}'.format(p.price) }} đ</span>
-                                <a href="{{ url_for('product_detail', product_id=p.id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">Xem</a>
+                                <span class="text-danger fw-bold">{% if p.on_sale %}<small class="text-muted text-decoration-line-through fw-normal">{{ '{:,.0f}'.format(p.price) }}</small> {% endif %}{{ '{:,.0f}'.format(p.eff_price) }} đ</span>
+                                <span class="text-muted small">{% if p.stock > 0 %}Còn {{ p.stock }}{% else %}Hết{% endif %}</span>
                             </div>
                         </div>
                     </div>
@@ -150,14 +311,48 @@
 </div>
 
 <script>
-    const stars = document.querySelectorAll('#star-rating span');
-    const ratingInput = document.getElementById('rating-input');
-    stars.forEach(star => {
-        star.addEventListener('click', () => {
-            const val = star.getAttribute('data-value');
-            ratingInput.value = val;
-            stars.forEach((s, i) => s.className = i < val ? 'text-warning' : 'text-secondary');
+    (function () {
+        // Nut Size/Mau -> dong bo select cu + ton theo bien the dang chon
+        var pills = document.querySelectorAll('#variant-pills .variant-pill');
+        var sel = document.getElementById('variant-select');
+        var stockBadge = document.getElementById('variant-stock');
+        var stockMap = {};
+        {% for v in variants %}stockMap[{{ (v.size ~ '|' ~ v.color)|tojson }}] = {{ v.stock }};{% endfor %}
+        function showStock(val){ if(!stockBadge) return; var s = stockMap[val]; stockBadge.textContent = (s==null?''):(s>0?('Biến thể đang chọn còn '+s+' cái'):('Biến thể đang chọn đã hết')); }
+        function mark(val){ pills.forEach(function(b){ b.classList.toggle('active', b.dataset.val===val); }); showStock(val); }
+        if (pills.length && sel) {
+            mark(sel.value);
+            pills.forEach(function(b){ b.addEventListener('click', function(){ sel.value = b.dataset.val; mark(sel.value); }); });
+            sel.addEventListener('change', function(){ mark(sel.value); });
+        }
+        // Gallery thumbs
+        var main = document.getElementById('main-img');
+        document.querySelectorAll('.thumb-img').forEach(function(t){ t.addEventListener('click', function(){ if(main) main.src = t.dataset.full; }); });
+        // San pham da xem (luu localStorage)
+        try {
+            var k='fs_viewed', id='{{ product.id }}', name={{ product.name|tojson }}, img={{ product.image|tojson }};
+            var arr = JSON.parse(localStorage.getItem(k)||'[]').filter(function(x){ return x.id!=id; });
+            arr.unshift({id:id,name:name,img:img}); localStorage.setItem(k, JSON.stringify(arr.slice(0,8)));
+        } catch(e){}
+        const stars = document.querySelectorAll('#star-rating span');
+        const ratingInput = document.getElementById('rating-input');
+        if (!stars.length || !ratingInput) return;
+        const paint = (val) => {
+            stars.forEach((s, i) => {
+                s.className = i < val ? 'text-gold' : 'text-secondary';
+                s.style.transform = i < val ? 'scale(1.15)' : 'scale(1)';
+                s.style.transition = 'transform .15s ease, color .15s ease';
+            });
+        };
+        paint(parseInt(ratingInput.value || '5', 10));
+        stars.forEach((star) => {
+            star.addEventListener('mouseenter', () => paint(parseInt(star.getAttribute('data-value'), 10)));
+            star.addEventListener('click', () => {
+                ratingInput.value = star.getAttribute('data-value');
+                paint(parseInt(ratingInput.value, 10));
+            });
         });
-    });
+        document.getElementById('star-rating').addEventListener('mouseleave', () => paint(parseInt(ratingInput.value || '5', 10)));
+    })();
 </script>
 {% endblock %}

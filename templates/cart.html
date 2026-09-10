@@ -1,7 +1,8 @@
 {% extends 'layout.html' %}
 {% block content %}
 <div class="container-xl mt-4 mb-5">
-    <h3 class="fw-bold text-dark mb-4">🛒 Giỏ hàng của bạn</h3>
+    <h3 class="fw-bold text-dark mb-1 text-uppercase">Giỏ hàng của bạn</h3>
+    <p class="text-muted small mb-4">Miễn phí vận chuyển cho đơn từ {{ '{:,.0f}'.format(freeship_threshold) }}đ - Kiểm hàng trước khi nhận - Đổi size 14 ngày (trừ Sale/Phụ kiện)</p>
 
     {% if not cart_items or cart_items|length == 0 %}
     <!-- GIAO DIỆN GIỎ HÀNG TRỐNG -->
@@ -10,7 +11,7 @@
             <img src="https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/cart/9bdd8040b334d31946f49e36beaf32db.png" alt="Empty Cart" style="width: 180px; opacity: 0.9; margin-bottom: 20px;">
             <h5 class="fw-bold text-secondary mb-2">Giỏ hàng của bạn còn trống</h5>
             <p class="text-muted mb-4 small">Bạn chưa chọn mua sản phẩm nào. Hãy dạo quanh cửa hàng nhé!</p>
-            <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm">MUA SẮM NGAY</a>
+            <a href="{{ url_for('index') }}" class="btn btn-dark btn-lg rounded-pill px-5 fw-bold shadow-sm text-uppercase">Mua sắm ngay</a>
         </div>
     </div>
     
@@ -34,7 +35,7 @@
                         <tbody>
                             {% set total_cart_price = namespace(value=0) %}
                             {% for item in cart_items %}
-                            {% set item_total = item.price * item.quantity %}
+                            {% set item_total = item.eff_price * item.quantity %}
                             {% set total_cart_price.value = total_cart_price.value + item_total %}
                             <tr>
                                 <td class="px-4 py-3">
@@ -42,11 +43,12 @@
                                         <img src="{{ item.image }}" class="rounded-3 border" style="width: 70px; height: 70px; object-fit: cover;">
                                         <div>
                                             <h6 class="fw-bold mb-1"><a href="{{ url_for('product_detail', product_id=item.product_id) }}" class="text-dark text-decoration-none">{{ item.name }}</a></h6>
-                                            <small class="text-muted">Kho: {{ item.stock }}</small>
+                                            {% if item.vsize %}<span class="badge bg-light text-dark border small">Size {{ item.vsize }} / {{ item.vcolor }}</span>{% endif %}
+                                            <small class="text-muted d-block">Kho phân loại: {{ item.stock }}</small>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="text-center fw-semibold text-secondary">{{ '{:,.0f}'.format(item.price) }} đ</td>
+                                <td class="text-center fw-semibold text-secondary">{% if item.on_sale %}<small class="text-muted text-decoration-line-through d-block">{{ '{:,.0f}'.format(item.price) }}</small>{% endif %}{{ '{:,.0f}'.format(item.eff_price) }} đ</td>
                                 <td class="text-center">
                                     <form action="{{ url_for('update_cart', item_id=item.id) }}" method="POST" class="d-inline-flex align-items-center border rounded-pill px-2 py-1 bg-light">
                                         <!-- LOGIC KIỂM TRA TỒN KHO TỐI ĐA (max) -->
@@ -56,9 +58,11 @@
                                 </td>
                                 <td class="text-end fw-bold text-danger px-4">{{ '{:,.0f}'.format(item_total) }} đ</td>
                                 <td class="pe-4 text-end">
-                                    <a href="{{ url_for('remove_from_cart', item_id=item.id) }}" class="btn btn-light text-danger rounded-circle p-2 shadow-sm" title="Xóa">
-                                        <i class="bi bi-trash-fill"></i>
-                                    </a>
+                                    <form action="{{ url_for('remove_from_cart', item_id=item.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Xóa sản phẩm này khỏi giỏ?');">
+                                        <button type="submit" class="btn btn-light text-danger rounded-circle p-2 shadow-sm" title="Xóa">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -71,14 +75,17 @@
         <!-- Cột Thanh toán -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 bg-white p-4 sticky-top" style="top: 100px;">
-                <h5 class="fw-bold mb-4 border-bottom pb-3">Tổng đơn hàng</h5>
+                <h5 class="fw-bold mb-3 text-uppercase small">Tổng đơn hàng</h5>
+                {% set need = freeship_threshold - total_cart_price.value %}
+                <div class="mb-3 small fw-bold">{% if need > 0 %}Bạn cần mua thêm {{ '{:,.0f}'.format(need) }}đ để được miễn phí vận chuyển{% else %}Đơn đã đủ {{ '{:,.0f}'.format(freeship_threshold) }}đ - được miễn phí vận chuyển{% endif %}</div>
+                <div class="freeship-bar mb-3"><div style="width: {{ [100, (total_cart_price.value*100/freeship_threshold)|int]|min if freeship_threshold > 0 else 100 }}%"></div></div>
                 <div class="d-flex justify-content-between mb-3">
                     <span class="text-muted">Tạm tính:</span>
                     <span class="fw-bold">{{ '{:,.0f}'.format(total_cart_price.value) }} đ</span>
                 </div>
                 <div class="d-flex justify-content-between mb-4 border-bottom pb-3">
                     <span class="text-muted">Phí giao hàng:</span>
-                    <span class="text-success fw-bold">Miễn phí</span>
+                    <span class="text-success fw-bold small">Nội thành free / Ngoại thành 30k<br>(tính khi đặt hàng)</span>
                 </div>
                 <div class="d-flex justify-content-between mb-4">
                     <span class="fw-bold fs-5">Tổng cộng:</span>
@@ -87,10 +94,23 @@
 
                 <!-- Form Đặt Hàng kèm Ô nhập Voucher -->
                 <form action="{{ url_for('checkout') }}" method="POST">
+                    {% if current_user.is_admin == 1 or current_user.role == 'Nhân viên' %}
+                    <!-- BÁN TẠI QUẦY: SĐT khớp acc khách quen thì đơn + điểm tự về acc đó -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Tên khách hàng</label>
+                        <input type="text" name="customer_name" class="form-control" placeholder="Tên khách tới mua...">
+                        <div class="form-text small text-muted">SĐT khớp khách quen thì đơn + điểm tự về acc đó.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Địa chỉ <span class="text-muted">(để trống = Mua tại cửa hàng)</span></label>
+                        <input type="text" name="address" class="form-control" placeholder="Để trống nếu khách lấy tại shop...">
+                    </div>
+                    {% else %}
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Địa chỉ giao hàng *</label>
                         <input type="text" name="address" class="form-control" required placeholder="Số nhà, tên đường, phường/xã...">
                     </div>
+                    {% endif %}
                     
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Số điện thoại *</label>
@@ -103,16 +123,84 @@
                         <input type="text" name="voucher_code" class="form-control" placeholder="Nhập mã voucher (VD: GIAM50K)...">
                     </div>
 
+                    {% if show_gift and gifts %}
+                    <div class="mb-3 p-2 border rounded bg-light">
+                        <label class="form-label small fw-bold mb-1">🎁 1 đơn 1 quà (đủ {{ '{:,.0f}'.format(freeship_threshold) }}đ hoặc SP có quà)</label>
+                        <select name="gift_id" class="form-select">
+                            <option value="">Không lấy quà</option>
+                            {% for g in gifts %}
+                            <option value="{{ g.id }}">{{ g.name }} (còn {{ g.stock }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    {% if not (current_user.is_admin == 1 or current_user.role == 'Nhân viên') %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Dùng điểm (bạn có {{ points_balance }} điểm = {{ '{:,.0f}'.format(points_balance * 1000) }}đ)</label>
+                        <input type="number" name="use_points" class="form-control" min="0" max="{{ points_balance }}" step="1" value="0" placeholder="Nhập số điểm muốn dùng...">
+                    </div>
+                    {% endif %}
+
+                    {% if applied_combos %}
+                    <div class="mb-3 p-2 border rounded bg-success-subtle small">
+                        <b>Combo tự động (không cần nhập tay):</b>
+                        {% for cb, times, disc in applied_combos %}
+                        <div>• {{ cb.name }} x{{ times }}{% if disc %} — giảm {{ '{:,.0f}'.format(disc) }}đ{% endif %}</div>
+                        {% endfor %}
+                        {% for gid, gqty, cb in combo_gifts %}
+                        <div>• Tặng SP #{{ gid }} x{{ gqty }} ({{ cb.name }})</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if not (current_user.is_admin == 1 or current_user.role == 'Nhân viên') %}
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Khu vực giao hàng *</label>
+                        <select name="ship_zone" class="form-select" required>
+                            <option value="noi_thanh">Nội thành (&lt;5km) — Miễn phí</option>
+                            <option value="ngoai_thanh">Ngoại thành (≥5km) — 30.000đ</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Hãng vận chuyển *</label>
+                        <select name="ship_carrier" class="form-select">
+                            {% for code, label, fee in ship_carriers %}
+                            <option value="{{ code }}">{{ label }}{% if fee %} (+{{ '{:,.0f}'.format(fee) }}đ){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text small">Free nếu đơn đủ {{ '{:,.0f}'.format(freeship_threshold) }}đ.</div>
+                    </div>
+                    {% else %}
+                    <div class="mb-3 small text-muted">Nhận hàng tại cửa hàng Đà Nẵng.</div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Ghi chú (đồng kiểm...)</label>
+                        <input type="text" name="note" class="form-control" maxlength="1000" placeholder="VD: gọi trước khi giao, cho xem hàng...">
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" name="dong_kiem" value="1" class="form-check-input" id="dongkiem" checked>
+                        <label class="form-check-label small fw-bold" for="dongkiem">Đồng kiểm: cho xem hàng trước khi nhận</label>
+                    </div>
+
                     <div class="mb-4">
                         <label class="form-label small fw-bold">Phương thức thanh toán</label>
                         <select name="payment_method" class="form-select">
                             <option value="COD">Thanh toán khi nhận hàng (COD)</option>
                             <option value="Chuyển khoản">Chuyển khoản ngân hàng (QR Code)</option>
+                            <option value="ATM">Thẻ ATM nội địa</option>
+                            <option value="Visa">Thẻ Visa/Master</option>
+                            <option value="Ví điện tử">Ví điện tử (Momo/ZaloPay)</option>
                         </select>
+                        {% if not (current_user.is_admin == 1 or current_user.role == 'Nhân viên') %}
+                        <div class="form-text small"><a href="{{ url_for('bank_guide') }}">Xem STK shop + hướng dẫn báo đã chuyển</a></div>
+                        {% endif %}
                     </div>
-                    <button type="submit" class="btn btn-danger btn-lg w-100 rounded-pill fw-bold shadow-sm">
-                        TIẾN HÀNH ĐẶT HÀNG
+                    <button type="submit" class="btn btn-fs-dark btn-lg w-100 fw-bold shadow-sm">
+                        Tiến hành đặt hàng
                     </button>
+                    <div class="trust-row p-2 mt-3 small text-muted text-center">GHN - Kiểm hàng trước khi nhận - Đổi 14 ngày còn tem</div>
                 </form>
             </div>
         </div>

@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-xl mt-4 mb-5">
+  <h3 class="fw-bold text-uppercase mb-3">Duyệt đánh giá</h3>
+  <div class="mb-3 d-flex gap-2">
+    <a href="{{ url_for('admin_reviews') }}" class="btn btn-sm rounded-pill {% if not status %}btn-dark{% else %}btn-outline-secondary{% endif %} fw-bold">Tất cả</a>
+    {% for s in ['Cho_duyet','Hien','An'] %}
+    <a href="{{ url_for('admin_reviews', status=s) }}" class="btn btn-sm rounded-pill {% if status==s %}btn-dark{% else %}btn-outline-secondary{% endif %} fw-bold">{{ s }} ({{ counts[s] }})</a>
+    {% endfor %}
+  </div>
+  {% for r in rows %}
+  <div class="bg-white rounded-4 shadow-sm p-4 mb-3">
+    <div class="d-flex justify-content-between flex-wrap gap-2"><b>{{ r.name }} — {{ r.rating }} sao — {{ r.pname }}</b><small class="text-muted">{{ r.created_at }} | {{ r.status }} | {{ r.helpful or 0 }} hữu ích</small></div>
+    <div class="mt-2">{{ r.comment }}</div>
+    {% if r.reply %}<div class="mt-2 p-2 bg-light rounded small"><b>Đã trả lời:</b> {{ r.reply }}</div>{% endif %}
+    <div class="d-flex gap-2 mt-3 flex-wrap">
+      <form action="{{ url_for('admin_review_moderate', rid=r.id) }}" method="POST" class="d-inline"><input type="hidden" name="action" value="Hien"><button class="btn btn-success btn-sm rounded-pill fw-bold" type="submit">Duyệt/Hiện</button></form>
+      <form action="{{ url_for('admin_review_moderate', rid=r.id) }}" method="POST" class="d-inline"><input type="hidden" name="action" value="An"><button class="btn btn-outline-secondary btn-sm rounded-pill" type="submit">Ẩn</button></form>
+      <form action="{{ url_for('admin_review_moderate', rid=r.id) }}" method="POST" class="d-flex gap-2 flex-fill"><input type="hidden" name="action" value="reply"><input name="reply" class="form-control form-control-sm" placeholder="Trả lời review..." value="{{ r.reply or '' }}"><button class="btn btn-dark btn-sm fw-bold" type="submit">Trả lời</button></form>
+      <form action="{{ url_for('admin_review_moderate', rid=r.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Xóa đánh giá?');"><input type="hidden" name="action" value="delete"><button class="btn btn-outline-danger btn-sm rounded-pill" type="submit">Xóa</button></form>
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center text-muted py-5">Không có đánh giá.</div>
+  {% endfor %}
+</div>
+{% endblock %}

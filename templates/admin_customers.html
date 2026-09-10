@@ -11,14 +11,14 @@
     
     <!-- Tiêu đề -->
     <div class="mb-4">
-        <h3 class="fw-bold text-dark mb-1">Quản lý Khách hàng</h3>
-        <p class="text-muted small">Danh sách các thành viên đã phát sinh giao dịch mua sắm (Có tổng <b>{{ customers|length }}</b> khách hàng)</p> 
+        <h3 class="fw-bold text-dark mb-1 text-uppercase">Quản lý khách hàng thân thiết</h3>
+        <p class="text-muted small">Bigsize M-5XL - Tổng <b>{{ customers|length }}</b> khách - Tích điểm + Đổi 14 ngày</p> 
     </div>
 
     <!-- Bảng Danh sách Khách hàng (Lấy data thật từ DB) -->
     <div class="card border-0 shadow-sm bg-white p-0" style="border-radius: 16px; overflow: hidden;">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-admin table-hover mb-0">
                 <thead>
                     <tr>
                         <th class="ps-4">Khách hàng</th>
@@ -41,7 +41,7 @@
                         <td class="text-center text-muted">{{ c.total_items }}</td>
                         <td class="text-end fw-bold text-success">{{ '{:,.0f}'.format(c.total_spent) }} đ</td>
                         <td class="text-center pe-4">
-                            <a href="{{ url_for('admin_customer_detail', phone=c.phone) }}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm fw-bold">Xem chi tiết</a>
+                            <a href="{{ url_for('admin_customer_detail', phone=c.phone) }}" class="btn btn-dark btn-sm rounded-pill px-3 shadow-sm fw-bold">Xem chi tiết</a>
                         </td>
                     </tr>
                     {% else %}
