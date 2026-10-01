@@ -14,7 +14,9 @@
             <input type="date" name="date" class="form-control form-control-sm border-secondary" value="{{ selected_date }}">
             <button type="submit" class="btn btn-dark btn-sm px-3 fw-bold text-uppercase">Lọc</button>
             {% if selected_date %}
-            <a href="{{ url_for('admin_transactions') }}" class="btn btn-outline-danger btn-sm">Bỏ lọc</a>
+            <a href="{{ url_for('admin_transactions', date='') }}" class="btn btn-outline-danger btn-sm">Xem tất cả</a>
+            {% else %}
+            <a href="{{ url_for('admin_transactions') }}" class="btn btn-outline-dark btn-sm">Hôm nay</a>
             {% endif %}
         </form>
     </div>

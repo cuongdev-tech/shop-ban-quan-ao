@@ -2753,8 +2753,14 @@ def admin_transactions():
         page = 1
     if page < 1:
         page = 1
-    # Default rỗng = xem tất cả, fix bug luôn lọc hôm nay
-    selected_date = (request.args.get('date') or '').strip()
+    # Mặc định mở trang là lọc ngày hôm nay; truyền ?date= rỗng (Xem tất cả) để xem toàn bộ
+    raw_date = request.args.get('date', None)
+    if raw_date is None:
+        selected_date = date.today().isoformat()
+    else:
+        selected_date = raw_date.strip()
+        if selected_date.lower() == 'all':
+            selected_date = ''
     per_page = 10
     
     where_clause = "status = 'Hoàn thành'"
